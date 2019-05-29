@@ -51,7 +51,7 @@ We can retrieve count values by using the `counts` function.
 These are stored as a sparse matrix, as provided by the base R package `Matrix`.
 
 ```{r}
-counts(sce)[1:3, 1:3]
+counts(sce)[6:9, 1:3]
 ```
 
 Size factors for normalisation are present in the object, and are accessed with the `sizeFactors` function.
@@ -63,7 +63,7 @@ head(sizeFactors(sce))
 Normalised counts can be accessed using `normcounts`, and log-transformed normalised counts may likewise be accessed using `logcounts`, as shown below.
 
 ```{r}
-logcounts(sce[1:3, 1:3])
+logcounts(sce)[6:9, 1:3]
 ```
 
 The MGI symbol for each gene can be found in the `rowData` of the SCE object.
@@ -101,16 +101,16 @@ Four are provided:
 * `umap.stagespecific`: a UMAP for cells of each specific stage (as for `corrected.stagespecific.pca`)
 
 The UMAP visualisation of the cells from E7.5 are shown below.
-The celltype colours that were used in the paper are available in this package, via the `celltype_colours` function
+The celltype colours that were used in the paper are available in this package, via the `celltype_colours` function.
+Data may also be extracted by specifing stage(s) when calling `EmbryoData` using the *stage* argument, as shown below.
 
 ```{r}
-umap.sub = reducedDim(sce, "umap.stagespecific")[colData(sce)$stage == "E7.5",]
-ct.sub = colData(sce)$celltype[colData(sce)$stage == "E7.5"]
+sce_sub = EmbryoData(stage = "E7.5")
 
 plot(
-    x = umap.sub[,1],
-    y = umap.sub[,2],
-    col = celltype_colours()[ct.sub],
+    x = reducedDim(sce_sub, "umap.stagespecific")[,1],
+    y = reducedDim(sce_sub, "umap.stagespecific")[,2],
+    col = celltype_colours()[colData(sce_sub)$celltype],
     pch = 19,
     xaxt = "n", yaxt = "n",
     xlab = "UMAP1", ylab = "UMAP2"

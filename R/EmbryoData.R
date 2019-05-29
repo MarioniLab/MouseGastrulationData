@@ -4,7 +4,7 @@
 #' returning a \linkS4class{SingleCellExperiment} object for further use.
 #'
 #' @details
-#' This function provides the embyro timecourse scRNA-seq data from Pijuan-Sala et al. (2019)
+#' This function provides the embryo timecourse scRNA-seq data from Pijuan-Sala et al. (2019)
 #' in the form of a \linkS4class{SingleCellExperiment} object. Doublets and
 #' stripped nuclei were excluded.
 #' 
@@ -19,6 +19,10 @@
 #' and for cells at each timepoint (corrected.stagespecific.pca), and UMAP coordinates calculated from these
 #' (umap, umap.stagespecific).
 #'
+#' @param stage A string, or vector of strings, that indicates a subset of timepoints to take from the
+#' atlas dataset. Values provided must exactly match values in the column data of the data object.
+#' @param hub An ExperimentHub object. This should likely be left as its default value.
+#' 
 #' @return A \linkS4class{SingleCellExperiment} object.
 #'
 #' @author Jonathan Griffiths
@@ -31,7 +35,16 @@
 #' @examples
 #' \dontrun{sce <- EmbryoData()}
 #' 
-EmbryoData <- function(hub=ExperimentHub()) {
+#' @importFrom ExperimentHub ExperimentHub
+#' @importFrom SingleCellExperiment SingleCellExperiment
+EmbryoData <- function(stage=NULL, hub=ExperimentHub()) {
     sce <- hub[hub$rdatapath=="EmbryoDataSCE.rds"][[1]]
+    #subset by stages
+    if(!is.null(stage)){
+    	if(!all(stage %in% colData(sce)$stage)){
+    		stop("At least one supplied stage value does not match any possible value")
+    	}
+    	sce = sce[,colData(sce)$stage %in% stage]
+    }
     sce
 }
