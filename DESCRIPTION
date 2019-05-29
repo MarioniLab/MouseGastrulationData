@@ -1,0 +1,14 @@
+Package: EmbryoData
+Title: Processed scRNAseq data from a timecourse of mouse gastrulation and early organogenesis
+Version: 0.1
+Date: 2019-05-29
+Authors@R: c(
+    person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")))
+Description: Processed scRNAseq data from a timecourse of mouse gastrulation and early organogenesis. See vignette for details.
+License: GPL-3
+NeedsCompilation: no
+Depends: R (>= 3.3), SingleCellExperiment
+Suggests: BiocStyle, knitr, rmarkdown
+VignetteBuilder: knitr
+Encoding: UTF-8
+biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData

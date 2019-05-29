@@ -1,0 +1,120 @@
+---
+title: "Overview of the EmbryoData SingleCellExperiment object"
+author: "Jonathan Griffiths"
+date: "Created: May 29, 2019; Compiled: `r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{EmbryoData}
+  %\VignetteEngine{knitr::rmarkdown}
+bibliography: biblio.bib
+---
+
+```{r style, echo=FALSE, results='asis'}
+BiocStyle::markdown()
+```
+
+# Raw data availability and accession code
+
+This package contains the processed data from the embryo atlas of [@pijuan-sala_single-cell_2019].
+Raw data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
+
+# Processing overview
+
+Detailed methods are available in the methods that accompany the paper, or at its [Github repo](https://github.com/MarioniLab/EmbryoTimecourse2018/).
+
+In brief, whole embryos were dissociated at timepoints between embryonic days (E) 6.5 and 8.5 of development.
+Libraries were generated using the 10x Genomics Chromium platform (v1 chemistry), and were sequenced on HiSeq 2500.
+Reads were aligned with Cellranger, using Ensembl 92 genome annotation.
+Swapped molecules were excluded (`DropletUtils::swappedDrops`) and cells were called with `DropletUtils::emptyDrops`.
+Called cells with aberrant transcriptional features (e.g., mitochondrial gene content) were excluded.
+
+Cells were normalised with `scran::computeSumFactors`, and doublets were excluded using the output of `scran::doubletCells`; 
+Cytoplasm-stripped nuclei were also excluded.
+Batch correction was performed in the principal component space with `scran::fastMNN`.
+Clusters were identified using a recursive strategy with `scran::buildSNNGraph` and `igraph::cluster_louvain`, and were annotated and merged by hand.
+
+# Data format and metadata
+
+The package provides the dataset in the form of a `SingleCellExperiment` object.
+This section details how you can interact with the object.
+
+```{r, message=FALSE}
+library(SingleCellExperiment)
+library(EmbryoData)
+sce = EmbryoData()
+sce
+```
+
+We can retrieve count values by using the `counts` function.
+These are stored as a sparse matrix, as provided by the base R package `Matrix`.
+
+```{r}
+counts(sce)[1:3, 1:3]
+```
+
+Size factors for normalisation are present in the object, and are accessed with the `sizeFactors` function.
+
+```{r}
+head(sizeFactors(sce))
+```
+
+Normalised counts can be accessed using `normcounts`, and log-transformed normalised counts may likewise be accessed using `logcounts`, as shown below.
+
+```{r}
+logcounts(sce[1:3, 1:3])
+```
+
+The MGI symbol for each gene can be found in the `rowData` of the SCE object.
+
+```{r}
+head(rowData(sce))
+```
+
+The `colData` contains cell-specific attributes.
+These include:
+
+* `sample.10x`: the 10x lane that each cell was processed in.
+
+* `sample.seq`: the sequencing run in which each cell was multiplexed.
+
+* `stage`: the timepoint of the pool of embryos from which each cell derived.
+
+* `embryo_pool`: the pool of embryos from which each cell derived (cells from the same pool often show no batch-effect).
+
+* `celltype`: the celltype annotation that was identified for each cell.
+
+```{r}
+head(colData(sce))
+```
+
+Reduced dimension representations are available via the `reducedDim` function.
+Four are provided:
+
+* `corrected.pca`: batch-corrected PCA coordinates for all cells together
+
+* `corrected.stagespecific.pca`: batch-corrected PCA coordinates for cells at each timepoint (i.e., these values are only meaningful if you consider *only* cells from one single timepoint from `colData(sce)$stage`).
+
+* `umap`: a UMAP for all cells
+
+* `umap.stagespecific`: a UMAP for cells of each specific stage (as for `corrected.stagespecific.pca`)
+
+The UMAP visualisation of the cells from E7.5 are shown below.
+The celltype colours that were used in the paper are available in this package, via the `celltype_colours` function
+
+```{r}
+umap.sub = reducedDim(sce, "umap.stagespecific")[colData(sce)$stage == "E7.5",]
+ct.sub = colData(sce)$celltype[colData(sce)$stage == "E7.5"]
+
+plot(
+    x = umap.sub[,1],
+    y = umap.sub[,2],
+    col = celltype_colours()[ct.sub],
+    pch = 19,
+    xaxt = "n", yaxt = "n",
+    xlab = "UMAP1", ylab = "UMAP2"
+	)
+```
+
+# References
