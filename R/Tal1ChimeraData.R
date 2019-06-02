@@ -14,14 +14,16 @@
 #' List elements are named after the corresponding sample.
 #' 
 #' @details
-#' This function downloads the data for the Tal1 chimera experiment from Pijuan-Sala et al. (2019).
+#' This function downloads the data for the E8.5 Tal1 chimera experiment from Pijuan-Sala et al. (2019).
 #' The dataset contains four 10X Genomics samples:
 #' \itemize{
-#' \item Sample 1: _Tal1_ knock-out cells (tomato positive), batch 1
-#' \item Sample 2: _Tal1_ knock-out cells (tomato positive), batch 2
-#' \item Sample 3: wild-type cells (tomato negative), batch 1
-#' \item Sample 4: wild-type cells (tomato negative), batch 2
+#' \item Sample 1: _Tal1_ knock-out cells (tomato positive)
+#' \item Sample 2: _Tal1_ knock-out cells (tomato positive)
+#' \item Sample 3: wild-type cells (tomato negative)
+#' \item Sample 4: wild-type cells (tomato negative)
 #' }
+#' All samples are from E8.5
+#' 
 #' 
 #' In the processed data, cell-containing libraries have already been identified in each sample
 #' using the \code{emptyDrops} function from \pkg{DropletUtils}.
