@@ -1,0 +1,92 @@
+---
+title: Preparing the atlas dataset for _ExperimentHub_
+author: Aaron Lun and Jonathan Griffiths
+date: 28 May 2019
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+```{r style, echo=FALSE, results='hide', message=FALSE}
+library(BiocStyle)
+knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Overview
+
+Here, we prepare a single-cell RNA sequencing timecourse dataset of mouse gastrulation and early organogenesis.
+Whole mouse embryos were harvested and dissociated at 6-hour timepoints between embryonic day (E) 6.5 and 8.5.
+Most timepoints contain several replicate samples.
+We will provide a highly processed form of the data, as was used in the primary analyses of the paper in which the data was released.
+
+# Preparing the processed data
+
+We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
+This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
+
+```{r}
+library(BiocFileCache)
+bfc <- BiocFileCache("raw_data", ask=FALSE)
+count.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/atlas_data/raw_counts.mtx.gz"))
+```
+
+We load in the count data from the MatrixMarket format, using methods from the `r CRANpkg("Matrix")` package:
+
+```{r}
+library(Matrix)
+counts <- readMM(count.path)
+dim(counts)
+```
+
+We download the cell- and gene-level metadata using `r Biocpkg("BiocFileCache")`, and read them into R.
+
+```{r}
+meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/atlas_data/meta.tab.gz"))
+meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
+head(meta.tab)
+
+gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/atlas_data/genes.tsv.gz"))
+gene.tab <- read.delim(gene.path, header=FALSE, stringsAsFactors=FALSE)
+colnames(gene.tab) <- c("ENSEMBL", "SYMBOL")
+head(gene.tab)
+```
+
+We store the count matrix in a `SingleCellExperiment` object with the metadata associated with each cell and gene.
+
+```{r}
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(list(counts=counts), 
+    colData=meta.tab, rowData=gene.tab)
+sce
+```
+
+We also obtain the size factors and store them in `sce`.
+
+```{r}
+sf <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/atlas_data/sizefactors.tab.gz"))
+sf <- read.delim(sf, header=FALSE, stringsAsFactors=FALSE)[,1]
+sizeFactors(sce) <- sf
+head(sf)
+```
+
+We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
+
+```{r}
+base <- file.path("MouseGastrulationData", "atlas", "1.0.0")
+dir.create(base, recursive=TRUE, showWarnings=FALSE)
+saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
+saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
+saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
+saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
+```
+
+# Session information
+
+```{r}
+sessionInfo()
+```
+
