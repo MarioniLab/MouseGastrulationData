@@ -68,7 +68,7 @@ We also obtain the size factors and store them in `sce`.
 ```{r}
 sf <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/chimera_tal1_data/sizefactors.tab.gz"))
-sf <- read.delim(sf, header=FALSE, stringsAsFactors=FALSE)
+sf <- read.delim(sf, header=FALSE, stringsAsFactors=FALSE)[,1]
 sizeFactors(sce) <- sf
 head(sf)
 ```
