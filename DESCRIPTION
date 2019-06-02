@@ -1,14 +1,28 @@
 Package: EmbryoData
-Title: Processed scRNAseq data from a timecourse of mouse gastrulation and early organogenesis
-Version: 0.1
+Title: Single-Cell Transcriptomics Data across Mouse Gastrulation and Early Organogenesis
+Version: 0.98.0
 Date: 2019-05-29
 Authors@R: c(
-    person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")))
-Description: Processed scRNAseq data from a timecourse of mouse gastrulation and early organogenesis. See vignette for details.
+    person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")),
+    person("Aaron", "Lun", email = "infinite.monkeys.with.keyboards@gmail.com", role = "aut"))
+Description: 
+    Provides processed and raw count matrices for single-cell RNA sequencing data 
+    from a timecourse of mouse gastrulation and early organogenesis.
+Depends: 
+    SingleCellExperiment
+Imports:
+    methods,
+    ExperimentHub,
+    BiocGenerics,
+    S4Vectors
+Suggests: 
+    BiocStyle, 
+    knitr, 
+    rmarkdown
+VignetteBuilder: 
+    knitr
 License: GPL-3
 NeedsCompilation: no
-Depends: R (>= 3.3), SingleCellExperiment
-Suggests: BiocStyle, knitr, rmarkdown
-VignetteBuilder: knitr
 Encoding: UTF-8
 biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData
+RoxygenNote: 6.1.1
