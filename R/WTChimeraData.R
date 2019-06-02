@@ -69,30 +69,11 @@ WTChimeraData <- function() {
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
     rowdata <- as(rowdata, "DataFrame")
 
-    if (type=="processed") {
-        counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
-        coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
-        sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
-        output <- SingleCellExperiment(list(counts=counts), rowdata=rowdata, colData=as(coldata, "DataFrame"))
-        sizeFactors(output) <- sf
-
-    } else {
-        ALLSAMPLES <- as.character(seq_len(4))
-        if (is.null(raw.samples)) {
-            raw.samples <- ALLSAMPLES
-        }
-
-        raw.samples <- as.character(raw.samples)
-        if (!all(raw.samples %in% ALLSAMPLES)) {
-            stop("'raw.samples' must be in 1:4")
-        }
-
-        output <- List()
-        for (i in raw.samples) {
-            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
-            output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
-        }
-    }
+    counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
+    coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
+    sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
+    output <- SingleCellExperiment(list(counts=counts), rowdata=rowdata, colData=as(coldata, "DataFrame"))
+    sizeFactors(output) <- sf
 
     output
 }
