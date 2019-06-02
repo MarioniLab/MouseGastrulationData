@@ -3,7 +3,7 @@
 #' Obtain the processed counts for the WT chimeric mouse embryo dataset.
 #'
 #' @return 
-#' A \linkS4class{SingleCellExperiment} is returned containing processed data from all sapmles.
+#' A \linkS4class{SingleCellExperiment} is returned containing processed data from all samples.
 #' 
 #' @details
 #' This function downloads the data for the WT chimera experiment from Pijuan-Sala et al. (2019).
@@ -51,7 +51,7 @@
 #' }
 #'
 #' @references
-#' Pijuan-Sala B, Griffiths JA, Guibentif C. et al. (2019). 
+#' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 
 #' A single-cell molecular map of mouse gastrulation and early organogenesis. 
 #' \emph{Nature} 566, 7745:490-495.
 #'
