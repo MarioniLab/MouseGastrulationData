@@ -22,7 +22,7 @@
 #' \item Sample 3: wild-type cells (tomato negative)
 #' \item Sample 4: wild-type cells (tomato negative)
 #' }
-#' All samples are from E8.5
+#' All samples are from E8.5.
 #' 
 #' 
 #' In the processed data, cell-containing libraries have already been identified in each sample
