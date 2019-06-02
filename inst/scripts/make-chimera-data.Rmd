@@ -59,7 +59,7 @@ We store the count matrix in a `SingleCellExperiment` object with the metadata a
 ```{r}
 library(SingleCellExperiment)
 sce <- SingleCellExperiment(list(counts=counts), 
-    colData=meta.tab[down.keep,], rowData=gene.tab)
+    colData=meta.tab, rowData=gene.tab)
 sce
 ```
 
@@ -90,9 +90,9 @@ We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
 Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample.
 
 ```{r}
-sample.paths <- character(length(sample.id))
-for (i in seq_along(sample.id)) {
-    fname <- sprintf("sample_%s_unswapped.mtx.gz", sample.id[i]) 
+sample.paths <- character(4)
+for (i in seq_along(sample.paths)) {
+    fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
     sample.paths[i] <- bfcrpath(bfc, 
         file.path("https://content.cruk.cam.ac.uk/",
        "jmlab/chimera_tal1_data/unfiltered", fname))
@@ -102,7 +102,7 @@ for (i in seq_along(sample.id)) {
 We read in each sparse matrix and serialize it into a sample-specific RDS file.
 
 ```{r}
-collected <- vector("list", length(sample.id))
+collected <- vector("list", length(sample.paths))
 for (i in seq_along(collected)) {
     curmat <- readMM(sample.paths[i])
     saveRDS(curmat, file=file.path(base, sprintf("counts-raw-sample%i,rds", i)))
