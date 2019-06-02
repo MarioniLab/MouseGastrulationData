@@ -1,13 +1,13 @@
-\name{EmbryoData-package}
-\alias{EmbryoData-package}
-\alias{EmbryoData}
+\name{MouseGastrulationData-package}
+\alias{MouseGastrulationData-package}
+\alias{MouseGastrulationData}
 
 \docType{package}
 \title{
-\packageTitle{EmbryoData}
+\packageTitle{MouseGastrulationData}
 }
 \description{
-\packageDescription{EmbryoData}
+\packageDescription{MouseGastrulationData}
 }
 \details{
 

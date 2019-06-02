@@ -33,12 +33,12 @@
 #' \emph{Nature} 566, pp490-495.
 #'
 #' @examples
-#' \dontrun{sce <- EmbryoData()}
+#' \dontrun{sce <- MouseGastrulationData()}
 #' 
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom SingleCellExperiment SingleCellExperiment
-EmbryoData <- function(stage=NULL, hub=ExperimentHub()) {
-    sce <- hub[hub$rdatapath=="EmbryoDataSCE.rds"][[1]]
+MouseGastrulationData <- function(stage=NULL, hub=ExperimentHub()) {
+    sce <- hub[hub$rdatapath=="MouseGastrulationDataSCE.rds"][[1]]
     #subset by stages
     if(!is.null(stage)){
     	if(!all(stage %in% colData(sce)$stage)){

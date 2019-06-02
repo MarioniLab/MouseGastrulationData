@@ -1,12 +1,12 @@
 ---
-title: "Overview of the EmbryoData SingleCellExperiment object"
+title: "Overview of the MouseGastrulationData SingleCellExperiment object"
 author: "Jonathan Griffiths"
 date: "Created: May 29, 2019; Compiled: `r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{EmbryoData}
+  %\VignetteIndexEntry{MouseGastrulationData}
   %\VignetteEngine{knitr::rmarkdown}
 bibliography: biblio.bib
 ---
@@ -42,8 +42,8 @@ This section details how you can interact with the object.
 
 ```{r, message=FALSE}
 library(SingleCellExperiment)
-library(EmbryoData)
-sce = EmbryoData()
+library(MouseGastrulationData)
+sce = MouseGastrulationData()
 sce
 ```
 
@@ -102,10 +102,10 @@ Four are provided:
 
 The UMAP visualisation of the cells from E7.5 are shown below.
 The celltype colours that were used in the paper are available in this package, via the `celltype_colours` function.
-Data may also be extracted by specifing stage(s) when calling `EmbryoData` using the *stage* argument, as shown below.
+Data may also be extracted by specifing stage(s) when calling `MouseGastrulationData` using the *stage* argument, as shown below.
 
 ```{r}
-sce_sub = EmbryoData(stage = "E7.5")
+sce_sub = MouseGastrulationData(stage = "E7.5")
 
 plot(
     x = reducedDim(sce_sub, "umap.stagespecific")[,1],

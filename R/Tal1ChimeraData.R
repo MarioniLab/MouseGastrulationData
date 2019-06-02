@@ -67,7 +67,7 @@
 Tal1ChimeraData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
 
-    host <- file.path("MouseEarlyEmbryoData", "tal1-chimera")
+    host <- file.path("MouseGastrulationData", "tal1-chimera")
     hub <- ExperimentHub()
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
     rowdata <- as(rowdata, "DataFrame")

@@ -7,7 +7,7 @@ info <- data.frame(
         c("Processed count matrix", "Per-gene metadata", "Per-cell metadata", "Size factors",
             sprintf("Raw counts for sample %i", seq_len(4)))
     ),
-    RDataPath = file.path("MouseEarlyEmbryoData", "tal1-chimera", "1.0.0", 
+    RDataPath = file.path("MouseGastrulationData", "tal1-chimera", "1.0.0", 
         c("counts-processed-all.rds", "rowdata.rds", "coldata.rds", "sizefac.rds",
             sprintf("counts-raw-sample%i.rds", seq_len(4)))
     ),

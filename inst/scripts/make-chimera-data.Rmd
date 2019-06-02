@@ -76,7 +76,7 @@ head(sf)
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
-base <- file.path("MouseEarlyEmbryoData", "tal1-chimera", "1.0.0")
+base <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
 dir.create(base, recursive=TRUE, showWarnings=FALSE)
 saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
 saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
