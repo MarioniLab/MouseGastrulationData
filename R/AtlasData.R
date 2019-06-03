@@ -49,7 +49,7 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-Tal1ChimeraData <- function() {
+AtlasData <- function() {
     type <- match.arg(type)
 
     host <- file.path("MouseGastrulationData", "atlas")
@@ -60,7 +60,13 @@ Tal1ChimeraData <- function() {
     counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
     coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
     sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
-    output <- SingleCellExperiment(list(counts=counts), rowdata=rowdata, colData=as(coldata, "DataFrame"))
+    reducedDims <- hub[hub$rdatapath==file.path(host, "reduced-dims.rds")][[1]]
+    output <- SingleCellExperiment(
+        list(counts=counts), 
+        rowData=rowdata, 
+        colData=as(coldata, "DataFrame"),
+        reducedDims=reducedDims
+        )
     sizeFactors(output) <- sf
 
     output

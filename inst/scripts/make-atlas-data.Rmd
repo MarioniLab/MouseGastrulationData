@@ -40,11 +40,13 @@ dim(counts)
 ```
 
 We download the cell- and gene-level metadata using `r Biocpkg("BiocFileCache")`, and read them into R.
+Several columns of the cell-level metadata contain information highly specific to analyses performed in Pijuan-Sala et al.; these are removed.
 
 ```{r}
 meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/atlas_data/meta.tab.gz"))
 meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
+meta.tab <- meta.tab[, !grepl("endo|haem", colnames(meta.tab))]
 head(meta.tab)
 
 gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
@@ -73,6 +75,20 @@ sizeFactors(sce) <- sf
 head(sf)
 ```
 
+A 50-dimensional batch-corrected principal component representation of the data is also available.
+We store this in the `SingleCellExperiment` object.
+Doublets and stripped nuclei are excluded from this representation.
+
+```{r}
+pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/atlas_data/corrected_pcas.rds"))
+pc.list <- readRDS(pc.path)
+pc.all <- pc.list$all[match(colData(sce)$cell, rownames(pc.list$all)),]
+rownames(pc.all) <- colData(sce)$cell
+reducedDim(sce, "pca.corrected") <- pc.all
+head(pc.all[,1:5])
+```
+
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
@@ -82,6 +98,7 @@ saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
 saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
 saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
 saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
 ```
 
 # Session information

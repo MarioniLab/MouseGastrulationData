@@ -77,6 +77,22 @@ sizeFactors(sce) <- sf
 head(sf)
 ```
 
+A 50-dimensional batch-corrected principal component representation of the data for each timepoint is also available.
+We store this in the `SingleCellExperiment` object.
+Doublets and stripped nuclei are excluded from these representations.
+
+```{r}
+pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/corrected_pcas.rds"))
+pc.list <- readRDS(pc.path)
+pc.75 <- pc.list[["E7.5"]][match(colData(sce)$cell, rownames(pc.list[["E7.5"]])),]
+pc.85 <- pc.list[["E8.5"]][match(colData(sce)$cell, rownames(pc.list[["E8.5"]])),]
+rownames(pc.75) <- rownames(pc.85) <- colData(sce)$cell
+reducedDim(sce, "pca.corrected.E7.5") <- pc.75
+reducedDim(sce, "pca.corrected.E8.5") <- pc.85
+head(pc.75[,1:5])
+```
+
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
@@ -86,6 +102,7 @@ saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
 saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
 saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
 saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
 ```
 
 # *Tal1* chimeras
@@ -148,6 +165,20 @@ sizeFactors(sce) <- sf
 head(sf)
 ```
 
+A 50-dimensional batch-corrected principal component representation of the data is also available.
+We store this in the `SingleCellExperiment` object.
+Doublets and stripped nuclei are excluded from this representation.
+
+```{r}
+pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_tal1_data/corrected_pcas.rds"))
+pc.list <- readRDS(pc.path)
+pc <- pc.list$all[match(colData(sce)$cell, rownames(pc.list$all)),]
+rownames(pc) <- colData(sce)$cell
+reducedDim(sce, "pca.corrected") <- pc
+head(pc[,1:5])
+```
+
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
@@ -157,6 +188,7 @@ saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
 saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
 saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
 saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
 ```
 
 ## Setting up the raw data
