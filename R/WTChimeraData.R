@@ -34,10 +34,11 @@
 #' \item{\code{sample}:}{Integer, number of the sample from which the cell was taken.}
 #' \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
 #' \item{\code{tomato}:}{Logical, whether this cell expressed td-Tomato during FACS.}
+#' \item{\code{pool}:}{Integer, embryo pool from which cell derived; samples with same value are matched.}
 #' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
-#' \item{\code{haem_closestcell}:}{???}
-#' \item{\code{haem_subcluster}:}{???}
+#' \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{AtlasData}}) after MNN mapping.}
+#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
 #' }
 #' 
 #' 

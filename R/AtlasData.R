@@ -21,15 +21,23 @@
 #' \item{\code{barcode}:}{Character, cell barcode from the 10X Genomics experiment.}
 #' \item{\code{sample}:}{Integer, number of the sample from which the cell was taken.}
 #' \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
-#' \item{\code{tomato}:}{Logical, whether this cell expressed td-Tomato during FACS.}
-#' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
-#' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
-#' \item{\code{haem_closestcell}:}{???}
-#' \item{\code{haem_subcluster}:}{???}
+#' \item{\code{sequencing.batch}:}{Integer, sequencing run in which sample was multiplexed.}
+#' \item{\code{theiler}:}{Character, Theiler stage from which the sample was taken; alternative scheme to \code{stage}.}
+#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
+#' \item{\code{doublet}:}{Logical, whether a cell was called as a doublet.}
+#' \item{\code{cluster}:}{Integer, top-level cluster to which cell was assigned across all samples.}
+#' \item{\code{cluster.sub}:}{Integer, cluster to which cell was assigned when clustered within each \code{cluster}.}
+#' \item{\code{cluster.stage}:}{Integer, top-level cluster to which cell was assigned within individual timepoints.}
+#' \item{\code{cluster.theiler}:}{Integer, top-level cluster to which cell was assigned within individual Theiler stages.}
+#' \item{\code{stripped}:}{Logical, whether a cell was called as a cytoplasm-stripped nucleus.}
+#' \item{\code{celltype}:}{Character, cell type to which the cell was assigned.}
+#' \item{\code{colour}:}{Integer, cell type colour (hex) as in Pijuan-Sala et al. (2019).}
+#' \item{\code{umapX}:}{Numeric, x-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
+#' \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' }
 #' 
 #' 
-#' For both raw and processed data, the row metadata contains the Ensembl ID and symbol for each gene.
+#' The row metadata contains the Ensembl ID and symbol for each gene.
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
