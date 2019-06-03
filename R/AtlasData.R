@@ -1,10 +1,17 @@
 #' Mouse gastrulation timecourse data
 #'
-#' Obtain the processed counts for the mouse gastrulation scRNAseq dataset.
+#' Obtain the processed or raw counts for the mouse gastrulation scRNAseq dataset.
 #'
+#' @param type String specifying the type of data to obtain, see Details.
+#' @param raw.samples Integer or character vector specifying the samples for which raw count matrices should be obtained.
+#' If \code{NULL}, raw count matrices are returned for all (36) samples.
+#' 
 #' @return 
-#' A \linkS4class{SingleCellExperiment} is returned containing processed data from all samples.
+#' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from all sapmles.
 #'
+#' If \code{type="raw"}, a \linkS4class{List} of SingleCellExperiments is returned,
+#' each containing the raw counts for a single sample.
+#' List elements are named after the corresponding sample.
 #' 
 #' @details
 #' This function downloads the data for the embryo atlas from Pijuan-Sala et al. (2019).
@@ -23,7 +30,7 @@
 #' \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
 #' \item{\code{sequencing.batch}:}{Integer, sequencing run in which sample was multiplexed.}
 #' \item{\code{theiler}:}{Character, Theiler stage from which the sample was taken; alternative scheme to \code{stage}.}
-#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
+#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{\link[scran]{doubletCells}}, performed on each sample separately.}
 #' \item{\code{doublet}:}{Logical, whether a cell was called as a doublet.}
 #' \item{\code{cluster}:}{Integer, top-level cluster to which cell was assigned across all samples.}
 #' \item{\code{cluster.sub}:}{Integer, cluster to which cell was assigned when clustered within each \code{cluster}.}
@@ -36,8 +43,12 @@
 #' \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' }
 #' 
+#' #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
+#' Swapped molecules have been removed using \code{\link[DropletUtils]{swappedDrops}}.
+#' No filtering has been performed to identify cells.
+#' This may be useful if performing analyses that need to account for the ambient RNA pool.
 #' 
-#' The row metadata contains the Ensembl ID and symbol for each gene.
+#' For both raw and processed data, the row metadata contains the Ensembl ID and MGI symbol for each gene.
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
@@ -57,7 +68,7 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-AtlasData <- function() {
+AtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
 
     host <- file.path("MouseGastrulationData", "atlas")
@@ -65,17 +76,36 @@ AtlasData <- function() {
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
     rowdata <- as(rowdata, "DataFrame")
 
-    counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
-    coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
-    sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
-    reducedDims <- hub[hub$rdatapath==file.path(host, "reduced-dims.rds")][[1]]
-    output <- SingleCellExperiment(
-        list(counts=counts), 
-        rowData=rowdata, 
-        colData=as(coldata, "DataFrame"),
-        reducedDims=reducedDims
+    if (type=="processed") {
+        counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
+        coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
+        sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
+        reducedDims <- hub[hub$rdatapath==file.path(host, "reduced-dims.rds")][[1]]
+        output <- SingleCellExperiment(
+            list(counts=counts), 
+            rowData=rowdata, 
+            colData=as(coldata, "DataFrame"),
+            reducedDims=reducedDims
         )
-    sizeFactors(output) <- sf
+        sizeFactors(output) <- sf
+
+    } else {
+        ALLSAMPLES <- as.character(c(1:10, 12:37))
+        if (is.null(raw.samples)) {
+            raw.samples <- ALLSAMPLES
+        }
+
+        raw.samples <- as.character(raw.samples)
+        if (!all(raw.samples %in% ALLSAMPLES)) {
+            stop("'raw.samples' must be in 1:10 and/or 12:37")
+        }
+
+        output <- List()
+        for (i in raw.samples) {
+            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
+            output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
+        }
+    }
 
     output
 }
