@@ -21,7 +21,7 @@ In the other, the chimeras study the effect of _Tal1_ knock-out in early mouse e
 # Wild-type chimeras
 
 This dataset contains four 10X Genomics samples, with two replicates each for the wild-type and _Tal1_ chimeric conditions.
-We will provide a highly processed form of the data.
+We will set up both the unfiltered count matrices from _CellRanger_ (having removed swapped molecules with `DropletUtils::swappedDrops`) as well as a highly processed form of the data.
 
 ## Preparing the processed data
 
@@ -96,19 +96,55 @@ head(pc.75[,1:5])
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
-base <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
-dir.create(base, recursive=TRUE, showWarnings=FALSE)
-saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
-saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
-saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
-saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
-saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
+base.wt <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
+dir.create(base.wt, recursive=TRUE, showWarnings=FALSE)
+saveRDS(counts(sce), file=file.path(base.wt, "counts-processed-all.rds"))
+saveRDS(rowData(sce), file=file.path(base.wt, "rowdata.rds"))
+saveRDS(colData(sce), file=file.path(base.wt, "coldata.rds"))
+saveRDS(sizeFactors(sce), file=file.path(base.wt, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base.wt, "reduced-dims.rds"))
 ```
+
+## Setting up the raw data
+
+We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
+Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
+
+```{r}
+sample.paths <- character(4)
+for (i in seq_along(sample.paths)) {
+    fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
+    sample.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/chimera_wt_data/unfiltered", fname))
+}
+barcode.paths <- character(4)
+for (i in seq_along(barcode.paths)) {
+    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
+    barcode.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/chimera_wt_data/unfiltered", fname))
+}
+```
+
+We read in each sparse matrix and serialize it into a sample-specific RDS file.
+
+```{r}
+collected <- vector("list", length(sample.paths))
+for (i in seq_along(collected)) {
+    curmat <- readMM(sample.paths[i])
+    colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
+    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i,rds", i)))
+}
+```
+
+Note that the row-level metadata is the same in both the raw and processed data, and does not need to be re-acquired.
+Column names of the matrices are the 10x cell barcodes.
 
 # *Tal1* chimeras
 
 This dataset contains four 10X Genomics samples, with two replicates each for the wild-type (host) and _Tal1_ (injected) chimeric conditions.
-We will set up both the raw count matrices from _CellRanger_ as well as a highly processed form of the data.
+We will set up both the unfiltered count matrices from _CellRanger_ (having removed swapped molecules with `DropletUtils::swappedDrops`) as well as a highly processed form of the data.
 For the latter, full details of the processing can be found at https://github.com/MarioniLab/EmbryoTimecourse2018.
 
 ## Preparing the processed data
@@ -184,25 +220,32 @@ head(pc[,1:5])
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
 
 ```{r}
-base <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
-dir.create(base, recursive=TRUE, showWarnings=FALSE)
-saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
-saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
-saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
-saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
-saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
+base.tal1 <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
+dir.create(base.tal1, recursive=TRUE, showWarnings=FALSE)
+saveRDS(counts(sce), file=file.path(base.tal1, "counts-processed-all.rds"))
+saveRDS(rowData(sce), file=file.path(base.tal1, "rowdata.rds"))
+saveRDS(colData(sce), file=file.path(base.tal1, "coldata.rds"))
+saveRDS(sizeFactors(sce), file=file.path(base.tal1, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base.tal1, "reduced-dims.rds"))
 ```
 
 ## Setting up the raw data
 
 We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
-Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample.
+Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
 
 ```{r}
 sample.paths <- character(4)
 for (i in seq_along(sample.paths)) {
     fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
     sample.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/chimera_tal1_data/unfiltered", fname))
+}
+barcode.paths <- character(4)
+for (i in seq_along(barcode.paths)) {
+    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
+    barcode.paths[i] <- bfcrpath(bfc, 
         file.path("https://content.cruk.cam.ac.uk/",
        "jmlab/chimera_tal1_data/unfiltered", fname))
 }
@@ -214,11 +257,13 @@ We read in each sparse matrix and serialize it into a sample-specific RDS file.
 collected <- vector("list", length(sample.paths))
 for (i in seq_along(collected)) {
     curmat <- readMM(sample.paths[i])
-    saveRDS(curmat, file=file.path(base, sprintf("counts-raw-sample%i,rds", i)))
+    colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
+    saveRDS(curmat, file=file.path(base.tal1, sprintf("counts-raw-sample%i,rds", i)))
 }
 ```
 
 Note that the row-level metadata is the same in both the raw and processed data, and does not need to be re-acquired.
+Column names of the matrices are the 10x cell barcodes.
 
 # Session information
 

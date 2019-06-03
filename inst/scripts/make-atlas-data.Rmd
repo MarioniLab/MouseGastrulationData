@@ -17,7 +17,7 @@ knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 Here, we prepare a single-cell RNA sequencing timecourse dataset of mouse gastrulation and early organogenesis.
 Whole mouse embryos were harvested and dissociated at 6-hour timepoints between embryonic day (E) 6.5 and 8.5.
 Most timepoints contain several replicate samples.
-We will provide a highly processed form of the data, as was used in the primary analyses of the paper in which the data was released.
+We will set up both the unfiltered count matrices from _CellRanger_ (having removed swapped molecules with `DropletUtils::swappedDrops`) as well as a highly processed form of the data, as was used in the analyses of Pijuan-Sala et al. (2019).
 
 # Preparing the processed data
 
@@ -100,6 +100,42 @@ saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
 saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
 saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
 ```
+
+# Setting up the raw data
+
+We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
+Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
+
+```{r}
+sample.paths <- character(4)
+for (i in seq_along(sample.paths)) {
+    fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
+    sample.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/atlas_data/unfiltered", fname))
+}
+barcode.paths <- character(4)
+for (i in seq_along(barcode.paths)) {
+    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
+    barcode.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/atlas_data/unfiltered", fname))
+}
+```
+
+We read in each sparse matrix and serialize it into a sample-specific RDS file.
+
+```{r}
+collected <- vector("list", length(sample.paths))
+for (i in seq_along(collected)) {
+    curmat <- readMM(sample.paths[i])
+    colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
+    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i,rds", i)))
+}
+```
+
+Note that the row-level metadata is the same in both the raw and processed data, and does not need to be re-acquired.
+Column names of the matrices are the 10x cell barcodes.
 
 # Session information
 
