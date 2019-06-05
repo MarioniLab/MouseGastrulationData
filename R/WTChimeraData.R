@@ -29,6 +29,7 @@
 #' \item Sample 10: E8.5 host cells (tomato negative), pool 5
 #' }
 #' Samples from the same pool are paired in the experimental design.
+#' Each pool is a biological replicate.
 #' Only samples 5 and 6 were used in the analyses of Pijuan-Sala et al. (2019).
 #' 
 #' In the processed data, cell-containing libraries have already been identified in each sample

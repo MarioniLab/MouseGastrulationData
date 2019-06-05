@@ -23,6 +23,7 @@
 #' \item Sample 4: wild-type cells (tomato negative)
 #' }
 #' All samples are from E8.5, from the same pool of chimeric embryos.
+#' Different samples with the same Tomato status are therefore technical replicates of each other.
 #' 
 #' 
 #' In the processed data, cell-containing libraries have already been identified in each sample
