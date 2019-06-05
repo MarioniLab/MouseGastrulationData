@@ -107,16 +107,17 @@ We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
 Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
 
 ```{r}
-sample.paths <- character(4)
+sample.paths <- character(36)
+sample.indices <- c(1:10, 12:37)
 for (i in seq_along(sample.paths)) {
-    fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
+    fname <- sprintf("sample_%s_unswapped.mtx.gz", sample.indices[i])
     sample.paths[i] <- bfcrpath(bfc, 
         file.path("https://content.cruk.cam.ac.uk/",
        "jmlab/atlas_data/unfiltered", fname))
 }
-barcode.paths <- character(4)
+barcode.paths <- character(36)
 for (i in seq_along(barcode.paths)) {
-    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
+    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", sample.indices[i])
     barcode.paths[i] <- bfcrpath(bfc, 
         file.path("https://content.cruk.cam.ac.uk/",
        "jmlab/atlas_data/unfiltered", fname))
@@ -130,7 +131,7 @@ collected <- vector("list", length(sample.paths))
 for (i in seq_along(collected)) {
     curmat <- readMM(sample.paths[i])
     colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
-    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i,rds", i)))
+    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i,rds", sample.indices[i])))
 }
 ```
 

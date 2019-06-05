@@ -111,14 +111,14 @@ We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
 Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
 
 ```{r}
-sample.paths <- character(4)
+sample.paths <- character(10)
 for (i in seq_along(sample.paths)) {
     fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
     sample.paths[i] <- bfcrpath(bfc, 
         file.path("https://content.cruk.cam.ac.uk/",
        "jmlab/chimera_wt_data/unfiltered", fname))
 }
-barcode.paths <- character(4)
+barcode.paths <- character(10)
 for (i in seq_along(barcode.paths)) {
     fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
     barcode.paths[i] <- bfcrpath(bfc, 
@@ -209,7 +209,7 @@ Doublets and stripped nuclei are excluded from this representation.
 
 ```{r}
 pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
-    "jmlab/chimera_tal1_data/corrected_pcas.rds"))
+    "jmlab/chimera_tal1_data/corrected_pcas_nodoubstripped.rds"))
 pc.list <- readRDS(pc.path)
 pc <- pc.list$all[match(colData(sce)$cell, rownames(pc.list$all)),]
 rownames(pc) <- colData(sce)$cell
