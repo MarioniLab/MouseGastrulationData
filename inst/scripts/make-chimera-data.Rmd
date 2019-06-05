@@ -169,12 +169,14 @@ dim(counts)
 
 We download the cell- and gene-level metadata using `r Biocpkg("BiocFileCache")`, and read them into R.
 Several columns of the cell-level metadata contain information highly specific to analyses performed in Pijuan-Sala et al.; these are removed.
+We also explicitly indicate in the metadata that the samples derived from a single embryo pool.
 
 ```{r}
 meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/chimera_tal1_data/meta.tab.gz"))
 meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
 meta.tab <- meta.tab[, !grepl("haem", colnames(meta.tab))]
+meta.tab$pool <- 1
 head(meta.tab)
 
 gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
