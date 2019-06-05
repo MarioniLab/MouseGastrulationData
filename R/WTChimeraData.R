@@ -46,11 +46,11 @@
 #' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{AtlasData}}) after MNN mapping.}
-#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{\link[scran]{doubletCells}}, performed on each sample separately.}
+#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
 #' }
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
-#' Swapped molecules have been removed using \code{\link[DropletUtils]{swappedDrops}}.
+#' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
 #' No filtering has been performed to identify cells.
 #' This may be useful if performing analyses that need to account for the ambient RNA pool.
 #' 

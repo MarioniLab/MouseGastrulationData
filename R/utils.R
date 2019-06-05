@@ -6,7 +6,7 @@
 #' A vector of RGB hexcodes, named according to the celltypes present in \code{\link{AtlasData}}
 #' 
 #' @details
-#' This vector of colours can be used directly as the \code{values} argument of \code{\link[ggplot2]{scale_color_manual}}, 
+#' This vector of colours can be used directly as the \code{values} argument of \code{ggplot2::scale_color_manual}, 
 #' or may be accessed using celltype labels for base R plotting.
 #' Colours for doublets or stripped nuclei are not included.
 #' 

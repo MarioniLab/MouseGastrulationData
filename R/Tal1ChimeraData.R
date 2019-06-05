@@ -41,7 +41,7 @@
 #' }
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
-#' Swapped molecules have been removed using \code{\link[DropletUtils]{swappedDrops}}.
+#' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
 #' No filtering has been performed to identify cells.
 #' This may be useful if performing analyses that need to account for the ambient RNA pool.
 #' 

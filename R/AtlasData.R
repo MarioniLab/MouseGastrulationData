@@ -30,7 +30,7 @@
 #' \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
 #' \item{\code{sequencing.batch}:}{Integer, sequencing run in which sample was multiplexed.}
 #' \item{\code{theiler}:}{Character, Theiler stage from which the sample was taken; alternative scheme to \code{stage}.}
-#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{\link[scran]{doubletCells}}, performed on each sample separately.}
+#' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
 #' \item{\code{doublet}:}{Logical, whether a cell was called as a doublet.}
 #' \item{\code{cluster}:}{Integer, top-level cluster to which cell was assigned across all samples.}
 #' \item{\code{cluster.sub}:}{Integer, cluster to which cell was assigned when clustered within each \code{cluster}.}
@@ -43,8 +43,8 @@
 #' \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' }
 #' 
-#' #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
-#' Swapped molecules have been removed using \code{\link[DropletUtils]{swappedDrops}}.
+#' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
+#' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
 #' No filtering has been performed to identify cells.
 #' This may be useful if performing analyses that need to account for the ambient RNA pool.
 #' 
