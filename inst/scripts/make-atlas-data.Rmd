@@ -131,7 +131,7 @@ collected <- vector("list", length(sample.paths))
 for (i in seq_along(collected)) {
     curmat <- readMM(sample.paths[i])
     colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
-    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i,rds", sample.indices[i])))
+    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i.rds", sample.indices[i])))
 }
 ```
 
