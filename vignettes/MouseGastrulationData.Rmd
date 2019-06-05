@@ -1,7 +1,7 @@
 ---
 title: "Overview of the MouseGastrulationData SingleCellExperiment object"
 author: "Jonathan Griffiths"
-date: "Created: May 29, 2019; Compiled: `r Sys.Date()`"
+date: "Created: June 5, 2019; Compiled: `r Sys.Date()`"
 output:
   BiocStyle::html_document:
     toc: true
@@ -17,15 +17,23 @@ BiocStyle::markdown()
 
 # Raw data availability and accession code
 
-This package contains the processed data from the embryo atlas of [@pijuan-sala_single-cell_2019].
+This package contains the processed data from the embryo atlas and chimeric embryos of [@pijuan-sala_single-cell_2019].
 Raw data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
 
 # Processing overview
 
 Detailed methods are available in the methods that accompany the paper, or at its [Github repo](https://github.com/MarioniLab/EmbryoTimecourse2018/).
 
-In brief, whole embryos were dissociated at timepoints between embryonic days (E) 6.5 and 8.5 of development.
+In brief, the atlas is comprised of whole embryos were dissociated at timepoints between embryonic days (E) 6.5 and 8.5 of development.
 Libraries were generated using the 10x Genomics Chromium platform (v1 chemistry), and were sequenced on HiSeq 2500.
+
+Data from experiments involving chimeric embryos are also available from this package.
+In these embryos, a population of fluorescent embryonic stem cells were injected into wild-type E3.5 mouse embryos.
+Both injected and host cells contribute to the different tissues in the mouse.
+The embryos were then returned to a parent mouse, and allowed to develop normally until collection.
+The cells are flow-sorted to purify host and injected populations, and libraries were generated using 10x version 2 chemistry, with sequencing on HiSeq 4000.
+Chimeras are especially effective for studying the effect of knockouts of essential developmental genes by injecting stem cells that possess a gene knockout: the presence of the wild-type host cells allows the embryo to compensate and avoid gross developmental failures, while cells with the knockout are also captured, and their aberrant behaviour can be studied.
+
 Reads were aligned with Cellranger, using Ensembl 92 genome annotation.
 Swapped molecules were excluded (`DropletUtils::swappedDrops`) and cells were called with `DropletUtils::emptyDrops`.
 Called cells with aberrant transcriptional features (e.g., mitochondrial gene content) were excluded.
@@ -35,7 +43,7 @@ Cytoplasm-stripped nuclei were also excluded.
 Batch correction was performed in the principal component space with `scran::fastMNN`.
 Clusters were identified using a recursive strategy with `scran::buildSNNGraph` and `igraph::cluster_louvain`, and were annotated and merged by hand.
 
-# Data format and metadata
+# Atlas data format
 
 The package provides the dataset in the form of a `SingleCellExperiment` object.
 This section details how you can interact with the object.
@@ -43,7 +51,7 @@ This section details how you can interact with the object.
 ```{r, message=FALSE}
 library(SingleCellExperiment)
 library(MouseGastrulationData)
-sce = MouseGastrulationData()
+sce <- AtlasData()
 sce
 ```
 
@@ -73,48 +81,53 @@ head(rowData(sce))
 ```
 
 The `colData` contains cell-specific attributes.
-These include:
-
-* `sample.10x`: the 10x lane that each cell was processed in.
-
-* `sample.seq`: the sequencing run in which each cell was multiplexed.
-
-* `stage`: the timepoint of the pool of embryos from which each cell derived.
-
-* `embryo_pool`: the pool of embryos from which each cell derived (cells from the same pool often show no batch-effect).
-
-* `celltype`: the celltype annotation that was identified for each cell.
+The meaning of each column is detailed in the function documentation (`?AtlasData`)
 
 ```{r}
 head(colData(sce))
 ```
 
-Reduced dimension representations are available via the `reducedDim` function.
-Four are provided:
+Batch-corrected PCA representations of the data are available via the `reducedDim` function, in the `pca.corrected` slot.
+This representation contains `NA` values for cells that are doublets, or cytoplasm-stripped nuclei.
 
-* `corrected.pca`: batch-corrected PCA coordinates for all cells together
-
-* `corrected.stagespecific.pca`: batch-corrected PCA coordinates for cells at each timepoint (i.e., these values are only meaningful if you consider *only* cells from one single timepoint from `colData(sce)$stage`).
-
-* `umap`: a UMAP for all cells
-
-* `umap.stagespecific`: a UMAP for cells of each specific stage (as for `corrected.stagespecific.pca`)
-
-The UMAP visualisation of the cells from E7.5 are shown below.
-The celltype colours that were used in the paper are available in this package, via the `celltype_colours` function.
-Data may also be extracted by specifing stage(s) when calling `MouseGastrulationData` using the *stage* argument, as shown below.
+A utility function for celltype colouring is also provided using the `CelltypePalette` function, whose use is shown below.
 
 ```{r}
-sce_sub = MouseGastrulationData(stage = "E7.5")
-
+head(CelltypePalette(), n=3)
+#exclude technical artefacts
+sce <- sce[, !(colData(sce)$doublet | colData(sce)$stripped)]
 plot(
-    x = reducedDim(sce_sub, "umap.stagespecific")[,1],
-    y = reducedDim(sce_sub, "umap.stagespecific")[,2],
-    col = celltype_colours()[colData(sce_sub)$celltype],
+    x = colData(sce)$umapX,
+    y = colData(sce)$umapY,
+    col = CelltypePalette()[colData(sce)$celltype],
     pch = 19,
     xaxt = "n", yaxt = "n",
     xlab = "UMAP1", ylab = "UMAP2"
 	)
 ```
+
+## Raw data access
+
+Unfiltered count matrices, where swapped molecules have been removed but no cells have been called, are also available using this package.
+These may be useful if you want to perform tests of cell-calling analyses, or analyses which use the ambient pool of RNA in 10x samples.
+They can be accessed using arguments to the `AtlasData` function, and are returned as `SingleCellExperiment` objects.
+Empty columns are excluded from these matrices.
+
+```{r}
+unfilt <- AtlasData(type="raw", raw.samples=c(12, 14))
+sapply(unfilt, dim)
+```
+
+# Chimera data information
+
+The package contains data for wild-type chimeras (ten samples, from five independant embryo pools, at two timepoints) and *Tal1* knockout chimeras (four samples, from one embryo pool, at one timepoint).
+The injected wild-type cells differ only in the insertion of the *tdTomato* construct; these data are useful for identifying properties of a typical chimera in *scRNAseq* data.
+The injected cells in the *Tal1* chimeras have disrupted and non-functional *Tal1* gene, as well as the *tdTomato* construct.
+
+Their data format follows the same principles as that described above for the atlas data, except for a few small differences:
+
+1. They contain an extra piece of gene annotation, for the construct of the fluorescent molecule *tdTomato*.
+
+2. Information for the proper pairing of samples from the same embryo pools can be found in the `colData` field `pool`.
 
 # References
