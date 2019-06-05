@@ -46,7 +46,6 @@ Several columns of the cell-level metadata contain information highly specific t
 meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/atlas_data/meta.tab.gz"))
 meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
-meta.tab <- meta.tab[, !grepl("endo|haem", colnames(meta.tab))]
 head(meta.tab)
 
 gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
@@ -131,7 +130,7 @@ collected <- vector("list", length(sample.paths))
 for (i in seq_along(collected)) {
     curmat <- readMM(sample.paths[i])
     colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
-    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i.rds", sample.indices[i])))
+    saveRDS(curmat, file=file.path(base, sprintf("counts-raw-sample%i.rds", sample.indices[i])))
 }
 ```
 

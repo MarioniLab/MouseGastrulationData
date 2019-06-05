@@ -26,7 +26,8 @@
 #' \describe{
 #' \item{\code{cell}:}{Character, unique cell identifier across all samples.}
 #' \item{\code{barcode}:}{Character, cell barcode from the 10X Genomics experiment.}
-#' \item{\code{sample}:}{Integer, number of the sample from which the cell was taken.}
+#' \item{\code{sample}:}{Integer, index of the sample from which the cell was taken.}
+#' \item{\code{pool}:}{Integer, index of the embryo pool from which the sample derived. Samples with the same value are technical, not biological, replicates}
 #' \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
 #' \item{\code{sequencing.batch}:}{Integer, sequencing run in which sample was multiplexed.}
 #' \item{\code{theiler}:}{Character, Theiler stage from which the sample was taken; alternative scheme to \code{stage}.}
