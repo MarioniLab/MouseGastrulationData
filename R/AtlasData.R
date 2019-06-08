@@ -71,42 +71,6 @@
 #' @importFrom methods as
 AtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
-
-    host <- file.path("MouseGastrulationData", "atlas")
-    hub <- ExperimentHub()
-    rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
-    rowdata <- as(rowdata, "DataFrame")
-
-    if (type=="processed") {
-        counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
-        coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
-        sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
-        reducedDims <- hub[hub$rdatapath==file.path(host, "reduced-dims.rds")][[1]]
-        output <- SingleCellExperiment(
-            list(counts=counts), 
-            rowData=rowdata, 
-            colData=as(coldata, "DataFrame"),
-            reducedDims=reducedDims
-        )
-        sizeFactors(output) <- sf
-
-    } else {
-        ALLSAMPLES <- as.character(c(1:10, 12:37))
-        if (is.null(raw.samples)) {
-            raw.samples <- ALLSAMPLES
-        }
-
-        raw.samples <- as.character(raw.samples)
-        if (!all(raw.samples %in% ALLSAMPLES)) {
-            stop("'raw.samples' must be in 1:10 and/or 12:37")
-        }
-
-        output <- List()
-        for (i in raw.samples) {
-            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
-            output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
-        }
-    }
-
-    output
+    host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
+    getRawOrProc(host, type, raw.samples, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
 }
