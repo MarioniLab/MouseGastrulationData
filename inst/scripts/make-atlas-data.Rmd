@@ -64,6 +64,11 @@ sce <- SingleCellExperiment(list(counts=counts),
 sce
 ```
 
+```{r, include=FALSE}
+rm(counts)
+gc()
+```
+
 We also obtain the size factors and store them in `sce`.
 
 ```{r}
