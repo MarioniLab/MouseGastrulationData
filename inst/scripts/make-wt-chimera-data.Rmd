@@ -77,12 +77,13 @@ head(sf)
 
 A 50-dimensional batch-corrected principal component representation of the data for each timepoint is also available.
 We store this in the `SingleCellExperiment` object.
-Doublets and stripped nuclei are excluded from these representations.
+Doublets and stripped nuclei are excluded from these representations - they are represented as `NA`s in the `reducedDim` slot, so that the representation is the correct dimension to fit in the `SingleCellExperiment` object.
 
 ```{r}
 pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/chimera_wt_data/corrected_pcas.rds"))
 pc.list <- readRDS(pc.path)
+#following match induces NA values deliberately
 pc.75 <- pc.list[["E7.5"]][match(colData(sce)$cell, rownames(pc.list[["E7.5"]])),]
 pc.85 <- pc.list[["E8.5"]][match(colData(sce)$cell, rownames(pc.list[["E8.5"]])),]
 rownames(pc.75) <- rownames(pc.85) <- colData(sce)$cell

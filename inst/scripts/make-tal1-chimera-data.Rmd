@@ -81,12 +81,13 @@ head(sf)
 
 A 50-dimensional batch-corrected principal component representation of the data is also available.
 We store this in the `SingleCellExperiment` object.
-Doublets and stripped nuclei are excluded from this representation.
+Doublets and stripped nuclei are excluded from these representations - they are represented as `NA`s in the `reducedDim` slot, so that the representation is the correct dimension to fit in the `SingleCellExperiment` object.
 
 ```{r}
 pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/chimera_tal1_data/corrected_pcas_nodoubstripped.rds"))
 pc.list <- readRDS(pc.path)
+#following match induces NA values deliberately
 pc <- pc.list$all[match(colData(sce)$cell, rownames(pc.list$all)),]
 rownames(pc) <- colData(sce)$cell
 reducedDim(sce, "pca.corrected") <- pc
