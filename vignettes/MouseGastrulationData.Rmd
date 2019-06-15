@@ -52,7 +52,7 @@ This section details how you can interact with the object.
 
 ```{r, message=FALSE}
 library(MouseGastrulationData)
-sce <- AtlasData()
+sce <- EmbryoAtlasData()
 sce
 ```
 
@@ -83,7 +83,7 @@ head(rowData(sce))
 ```
 
 The `colData` contains cell-specific attributes.
-The meaning of each field is detailed in the function documentation (`?AtlasData`).
+The meaning of each field is detailed in the function documentation (`?EmbryoAtlasData`).
 
 ```{r}
 head(colData(sce))
@@ -112,10 +112,10 @@ plot(
 
 Unfiltered count matrices are also available from `r Biocpkg("MouseGastrulationData")`.
 This refers to count matrices where swapped molecules have been removed but no cells have been called, 
-They can be obtained using the `AtlasData()` function and are returned as `SingleCellExperiment` objects.
+They can be obtained using the `EmbryoAtlasData()` function and are returned as `SingleCellExperiment` objects.
 
 ```{r}
-unfilt <- AtlasData(type="raw", raw.samples=c(12, 14))
+unfilt <- EmbryoAtlasData(type="raw", raw.samples=c(12, 14))
 sapply(unfilt, dim)
 ```
 

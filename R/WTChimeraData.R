@@ -46,7 +46,7 @@
 #' \item{\code{pool}:}{Integer, embryo pool from which cell derived; samples with same value are matched.}
 #' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
-#' \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{AtlasData}}) after MNN mapping.}
+#' \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{EmbryoAtlasData}}) after MNN mapping.}
 #' \item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
 #' }
 #' 

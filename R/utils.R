@@ -3,7 +3,7 @@
 #' Obtain the vector of cell type colours used in Pijuan-Sala et al. (2019).
 #' 
 #' @return 
-#' A vector of RGB hexcodes, named according to the celltypes present in \code{\link{AtlasData}}
+#' A vector of RGB hexcodes, named according to the celltypes present in \code{\link{EmbryoAtlasData}}
 #' 
 #' @details
 #' This vector of colours can be used directly as the \code{values} argument of \code{ggplot2::scale_color_manual}, 

@@ -53,9 +53,9 @@
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
-#' \dontrun{atlas.data <- AtlasData()
+#' \dontrun{atlas.data <- EmbryoAtlasData()
 #'
-#' atlas.data <- AtlasData(type="processed")
+#' atlas.data <- EmbryoAtlasData(type="processed")
 #' }
 #'
 #' @references
@@ -69,7 +69,7 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-AtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
+EmbryoAtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
     getRawOrProc(host, type, raw.samples, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
