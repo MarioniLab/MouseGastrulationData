@@ -40,12 +40,16 @@ dim(counts)
 ```
 
 We download the cell- and gene-level metadata using `r Biocpkg("BiocFileCache")`, and read them into R.
-Several columns of the cell-level metadata contain information highly specific to analyses performed in Pijuan-Sala et al.; these are removed.
+The UMAP coordinates are separated for later inclusion as a `reducedDim` item.
+The extensive metadata associated with specific analyses from the publication of this dataset have already been removed.
 
 ```{r}
 meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
     "jmlab/atlas_data/meta.tab.gz"))
 meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
+umap <- as.matrix(meta.tab[, c("umapX", "umapY")])
+colnames(umap) <- c("x", "y")
+meta.tab <- meta.tab[, -which(names(meta.tab) %in% c("umapX", "umapY"))]
 head(meta.tab)
 
 gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
@@ -91,6 +95,12 @@ pc.all <- pc.list$all[match(colData(sce)$cell, rownames(pc.list$all)),]
 rownames(pc.all) <- colData(sce)$cell
 reducedDim(sce, "pca.corrected") <- pc.all
 head(pc.all[,1:5])
+```
+
+The UMAP coordinates from the `colData` are also saved; similarly, this excludes doublets and stripped nuclei.
+
+```{r}
+reducedDim(sce, "umap") <- umap
 ```
 
 We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
