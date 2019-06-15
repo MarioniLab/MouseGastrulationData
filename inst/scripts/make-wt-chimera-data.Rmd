@@ -1,0 +1,147 @@
+---
+title: Preparing the wild-type chimera dataset for _ExperimentHub_
+author: Aaron Lun and Jonathan Griffiths
+date: 28 May 2019
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+```{r style, echo=FALSE, results='hide', message=FALSE}
+library(BiocStyle)
+knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Overview
+
+Here, we prepare single-cell RNA sequencing datasets of chimeric embryos.
+Wild-type cells (with for the addition of a fluorescent construct) were injected into wild-type embryos, to identify baseline effects from the generation of chimeras.
+
+This dataset contains ten 10X Genomics samples, with embryo pools split between the E7.5 and E8.5 timepoints.
+Two pools are present for E7.5, and three for E8.5.
+We will set up both the unfiltered count matrices from _CellRanger_ (having removed swapped molecules with `DropletUtils::swappedDrops`) as well as a highly processed form of the data.
+
+# Preparing the processed data
+
+We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
+This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
+
+```{r}
+library(BiocFileCache)
+bfc <- BiocFileCache("raw_data", ask=FALSE)
+count.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/raw_counts.mtx.gz"))
+```
+
+We load in the count data from the MatrixMarket format, using methods from the `r CRANpkg("Matrix")` package:
+
+```{r}
+library(Matrix)
+counts <- readMM(count.path)
+dim(counts)
+```
+
+We download the cell- and gene-level metadata using `r Biocpkg("BiocFileCache")`, and read them into R.
+
+```{r}
+meta.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/meta.tab.gz"))
+meta.tab <- read.delim(meta.path, stringsAsFactors=FALSE)
+head(meta.tab)
+
+gene.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/genes.tsv.gz"))
+gene.tab <- read.delim(gene.path, header=FALSE, stringsAsFactors=FALSE)
+colnames(gene.tab) <- c("ENSEMBL", "SYMBOL")
+head(gene.tab)
+```
+
+We store the count matrix in a `SingleCellExperiment` object with the metadata associated with each cell and gene.
+
+```{r}
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(list(counts=counts), 
+    colData=meta.tab, rowData=gene.tab)
+sce
+```
+
+We also obtain the size factors and store them in `sce`.
+
+```{r}
+sf <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/sizefactors.tab.gz"))
+sf <- read.delim(sf, header=FALSE, stringsAsFactors=FALSE)[,1]
+sizeFactors(sce) <- sf
+head(sf)
+```
+
+A 50-dimensional batch-corrected principal component representation of the data for each timepoint is also available.
+We store this in the `SingleCellExperiment` object.
+Doublets and stripped nuclei are excluded from these representations.
+
+```{r}
+pc.path <- bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+    "jmlab/chimera_wt_data/corrected_pcas.rds"))
+pc.list <- readRDS(pc.path)
+pc.75 <- pc.list[["E7.5"]][match(colData(sce)$cell, rownames(pc.list[["E7.5"]])),]
+pc.85 <- pc.list[["E8.5"]][match(colData(sce)$cell, rownames(pc.list[["E8.5"]])),]
+rownames(pc.75) <- rownames(pc.85) <- colData(sce)$cell
+reducedDim(sce, "pca.corrected.E7.5") <- pc.75
+reducedDim(sce, "pca.corrected.E8.5") <- pc.85
+head(pc.75[,1:5])
+```
+
+We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
+
+```{r}
+base.wt <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
+dir.create(base.wt, recursive=TRUE, showWarnings=FALSE)
+saveRDS(counts(sce), file=file.path(base.wt, "counts-processed-all.rds"))
+saveRDS(rowData(sce), file=file.path(base.wt, "rowdata.rds"))
+saveRDS(colData(sce), file=file.path(base.wt, "coldata.rds"))
+saveRDS(sizeFactors(sce), file=file.path(base.wt, "sizefac.rds"))
+saveRDS(reducedDims(sce), file=file.path(base.wt, "reduced-dims.rds"))
+```
+
+# Setting up the raw data
+
+We obtain the raw count data through the `r Biocpkg("BiocFileCache")` framework.
+Each file contains the raw (unfiltered) count matrix from _CellRanger_ for each sample, with swapped molecules removed via `DropletUtils::swappedDrops`.
+
+```{r}
+sample.paths <- character(10)
+for (i in seq_along(sample.paths)) {
+    fname <- sprintf("sample_%s_unswapped.mtx.gz", i)
+    sample.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/chimera_wt_data/unfiltered", fname))
+}
+barcode.paths <- character(10)
+for (i in seq_along(barcode.paths)) {
+    fname <- sprintf("barcodes_%s_unswapped.tsv.gz", i)
+    barcode.paths[i] <- bfcrpath(bfc, 
+        file.path("https://content.cruk.cam.ac.uk/",
+       "jmlab/chimera_wt_data/unfiltered", fname))
+}
+```
+
+We read in each sparse matrix and serialize it into a sample-specific RDS file.
+
+```{r}
+collected <- vector("list", length(sample.paths))
+for (i in seq_along(collected)) {
+    curmat <- readMM(sample.paths[i])
+    colnames(curmat) <- read.table(barcode.paths[i], stringsAsFactors=FALSE)[,1]
+    saveRDS(curmat, file=file.path(base.wt, sprintf("counts-raw-sample%i.rds", i)))
+}
+```
+
+Note that the row-level metadata is the same in both the raw and processed data, and does not need to be re-acquired.
+Column names of the matrices are the 10x cell barcodes.
+
+# Session information
+
+```{r}
+sessionInfo()
+```
+
