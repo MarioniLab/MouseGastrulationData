@@ -1,6 +1,6 @@
 ---
 title: Overview of the MouseGastrulationData datasets
-author: Jonathan Griffiths
+author: Jonathan Griffiths and Aaron Lun
 date: "Revised: June 5, 2019"
 output:
   BiocStyle::html_document:
@@ -18,9 +18,8 @@ knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 
 # Introduction
 
-The `r Biocpkg("MouseGastrulationData")` package provides convenient access to the single-cell RNA sequencing (scRNA-seq) datasets from @pijuan-sala_single-cell_2019.
-This study focuses on mouse gastrulation and organogenesis,
-providing transcriptomic profiles at single-cell resolution across several stages of early development.
+The `r Biocpkg("MouseGastrulationData")` package provides convenient access to the single-cell RNA sequencing (scRNA-seq) datasets from @pijuan-sala_single-cell_2019, and additional data generated in similar systems.
+This study focuses on mouse gastrulation and organogenesis, providing transcriptomic profiles at single-cell resolution across several stages of early development.
 Datasets are provided as count matrices with additional feature- and sample-level metadata after processing.
 Raw sequencing data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
 
@@ -146,9 +145,11 @@ The package contains two chimeric datasets:
 - Wild-type chimeras involving ten samples, from five independant embryo pools at two timepoints.
 The injected wild-type cells differ only in the insertion of the *td-Tomato* construct.
 These data are useful for identifying properties of a typical chimera in *scRNAseq* data.
+Raw sequencing data are available at [E-MTAB-7324](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7324/).
 - *Tal1* knockout chimeras involving four samples, from one embryo pool at one timepoint.
 The injected cells in the *Tal1* chimeras have are knockouts for the *Tal1* gene.
 They also contain the *td-Tomato* construct.
+Raw sequencing data are available at [E-MTAB-7325](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7325/).
 
 The processed data for each experiment are provided as a `SingleCellExperiment`, as for the previously described atlas data.
 However, there are a few small differences:
