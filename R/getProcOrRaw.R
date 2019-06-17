@@ -1,7 +1,9 @@
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom SingleCellExperiment SingleCellExperiment 
 #' @importFrom BiocGenerics sizeFactors
+#' @importFrom BiocGenerics sizeFactors<-
 #' @importClassesFrom S4Vectors DataFrame
+#' @importFrom S4Vectors List
 #' @importFrom methods as
 getProcOrRaw <- function(host, type, raw.samples, raw.options, raw.err) {
     hub <- ExperimentHub()
