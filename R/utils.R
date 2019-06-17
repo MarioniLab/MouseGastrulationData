@@ -12,10 +12,8 @@
 #' 
 #' @author JonathanGriffiths
 #' @examples
-#' \dontrun{cols <- CelltypeColours()
-#'
+#' cols <- CelltypeColours()
 #' head(cols)
-#' }
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 
