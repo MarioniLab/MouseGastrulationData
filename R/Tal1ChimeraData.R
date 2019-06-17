@@ -69,5 +69,5 @@
 Tal1ChimeraData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
-    getRawOrProc(host, type, raw.samples, raw.options=as.character(seq_len(4)), raw.err="1:4")
+    getProcOrRaw(host, type, raw.samples, raw.options=as.character(seq_len(4)), raw.err="1:4")
 }
