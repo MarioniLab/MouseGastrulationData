@@ -17,9 +17,9 @@ The data were processed as described in the methods that accompany the paper.
 
 }
 \author{
-\packageAuthor{scRNAseq}
+\packageAuthor{MouseGastrulationData}
 
-Maintainer: \packageMaintainer{scRNAseq}
+Maintainer: \packageMaintainer{MouseGastrulationData}
 }
 
 \references{
