@@ -68,12 +68,9 @@ Size factors for normalisation are present in the object and are accessed with t
 head(sizeFactors(sce))
 ```
 
-Normalised counts can be accessed using `normcounts()`.
-Similarly, log-transformed normalised counts may be accessed using `logcounts()`, as shown below.
-
-```{r}
-logcounts(sce)[6:9, 1:3]
-```
+After running `scater::normalize` on the `r Biocpkg(SingleCellExperiment)` object, normalised counts can be accessed using `normcounts()`.
+Similarly, log-transformed normalised counts may be accessed using `logcounts()`
+These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg(scater)`.
 
 The MGI symbol for each gene is stored in the `rowData` of the `SingleCellExperiment` object.
 
@@ -91,16 +88,18 @@ head(colData(sce))
 Batch-corrected PCA representations of the data are available via the `reducedDim` function, in the `pca.corrected` slot.
 This representation contains `NA` values for cells that are doublets, or cytoplasm-stripped nuclei.
 
-A utility function for celltype colouring is also provided using the `CelltypePalette` function, whose use is shown below.
+A vector of celltype colours (as used in the paper) is also provided, and is accessible via `data(embryo_celltype_colours)`.
+Its use is shown below.
 
 ```{r}
-head(CelltypePalette(), n=3)
+data(embryo_celltype_colours)
+head(embryo_celltype_colours, n=3)
 #exclude technical artefacts
-sce <- sce[, !(colData(sce)$doublet | colData(sce)$stripped)]
+singlets <- which(!(colData(sce)$doublet | colData(sce)$stripped))
 plot(
-    x = colData(sce)$umapX,
-    y = colData(sce)$umapY,
-    col = CelltypePalette()[colData(sce)$celltype],
+    x = reducedDim(sce, "umap")[singlets, 1],
+    y = reducedDim(sce, "umap")[singlets, 2],
+    col = embryo_celltype_colours[colData(sce)$celltype[singlets]],
     pch = 19,
     xaxt = "n", yaxt = "n",
     xlab = "UMAP1", ylab = "UMAP2"
@@ -146,18 +145,20 @@ The package contains two chimeric datasets:
 The injected wild-type cells differ only in the insertion of the *td-Tomato* construct.
 These data are useful for identifying properties of a typical chimera in *scRNAseq* data.
 Raw sequencing data are available at [E-MTAB-7324](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7324/).
+The data can be accessed using the `WTChimeraData()` function.
 - *Tal1* knockout chimeras involving four samples, from one embryo pool at one timepoint.
 The injected cells in the *Tal1* chimeras have are knockouts for the *Tal1* gene.
 They also contain the *td-Tomato* construct.
 Raw sequencing data are available at [E-MTAB-7325](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7325/).
+The data can be accessed using the `Tal1ChimeraData()` function.
 
 The processed data for each experiment are provided as a `SingleCellExperiment`, as for the previously described atlas data.
 However, there are a few small differences:
 
 - They contain an extra feature for expression of the *td-Tomato*.
-- Cells derived from the injected cells (and thus are positive for *td-Tomota*) are marked in the `colData` field `tomato`.
+- Cells derived from the injected cells (and thus are positive for *td-Tomato*) are marked in the `colData` field `tomato`.
 - Information for the proper pairing of samples from the same embryo pools can be found in the `colData` field `pool`.
 
-Unfilered count matrices are also provided for each sample in these datasets.
+Unfiltered count matrices are also provided for each sample in these datasets.
 
 # References
