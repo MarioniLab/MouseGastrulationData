@@ -53,10 +53,9 @@
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
-#' \dontrun{atlas.data <- EmbryoAtlasData()
+#' atlas.data <- EmbryoAtlasData()
 #'
 #' atlas.data <- EmbryoAtlasData(type="processed")
-#' }
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 

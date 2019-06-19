@@ -50,10 +50,9 @@
 #'
 #' @author Aaron Lun
 #' @examples
-#' \dontrun{tal1.data <- Tal1ChimeraData()
+#' tal1.data <- Tal1ChimeraData()
 #'
 #' tal1.data <- Tal1ChimeraData(type="processed")
-#' }
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 
