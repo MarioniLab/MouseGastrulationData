@@ -10,9 +10,6 @@ This includes gene counts, cell annotation, and reduced-dimension representation
 Data for chimeric embryos, also generated for Pijuan-Sala et al. (2019), are available via this package, presented in a similar manner to the atlas data.
 These include the *Tal1*<sup>-/-</sup>/wild-type and wild-type/wild-type chimaeras.
 
-## To install
-
-
 ## References
 
 Blanca Pijuan-Sala<sup>\*</sup>, Jonathan A. Griffiths<sup>\*</sup>, Carolina Guibentif<sup>\*</sup>, Tom W. Hiscock, Wajid Jawaid, Fernando J. Calero-Nieto, Carla Mulas, Ximena Ibarra-Soria, Richard C.V. Tyser, Debbie Lee Lian Ho, Wolf Reik, Shankar Srinivas, Benjamin D. Simons, Jennifer Nichols, John C. Marioni, Berthold Göttgens. A single-cell molecular map of mouse gastrulation and early organogenesis. *Nature* __566__, pp490-495 (2019).
