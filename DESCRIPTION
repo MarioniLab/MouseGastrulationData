@@ -1,6 +1,6 @@
 Package: MouseGastrulationData
 Title: Single-Cell Transcriptomics Data across Mouse Gastrulation and Early Organogenesis
-Version: 0.99.3
+Version: 0.99.4
 Date: 2019-06-17
 Authors@R: c(
     person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")),
@@ -9,6 +9,7 @@ Description:
     Provides processed and raw count matrices for single-cell RNA sequencing data 
     from a timecourse of mouse gastrulation and early organogenesis.
 Depends: 
+    R (>= 2.10)
     SingleCellExperiment
 Imports:
     methods,
