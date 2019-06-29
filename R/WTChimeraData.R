@@ -3,6 +3,10 @@
 #' Obtain the processed or raw counts for the WT chimeric mouse embryo dataset.
 #'
 #' @param type String specifying the type of data to obtain, see Details.
+#' @param subsample.frac Fraction of cells from the processed dataset to return.
+#' Cells are sampled entirely at random. Value should be more than 0 and less than 1.
+#' Default behaviour is to return all cells.
+#' @param subsample.seed Seed for the sampling step (see \code{subsample.frac}).
 #' @param raw.samples Integer or character vector specifying the samples for which raw count matrices should be obtained.
 #' If \code{NULL}, raw count matrices are returned for all (ten) samples.
 #'
@@ -74,8 +78,8 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-WTChimeraData <- function(type=c("processed", "raw"), raw.samples=NULL) {
+WTChimeraData <- function(type=c("processed", "raw"), subsample.frac=NULL, subsample.seed = NULL, raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
-    getProcOrRaw(host, type, raw.samples, raw.options=as.character(seq_len(10)), raw.err="1:10")
+    getProcOrRaw(host, type, raw.samples, subsample.frac, subsample.seed, raw.options=as.character(seq_len(10)), raw.err="1:10")
 }

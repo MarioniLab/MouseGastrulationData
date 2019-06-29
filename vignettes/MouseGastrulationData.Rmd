@@ -48,10 +48,11 @@ and `cluster_louvain` (from `r CRANpkg("igraph")`), and were annotated and merge
 
 The package provides the dataset in the form of a `SingleCellExperiment` object.
 This section details how you can interact with the object.
+We load in only 20% of the cells in the full dataset to reduce the resources required to compile this vignette.
 
 ```{r, message=FALSE}
 library(MouseGastrulationData)
-sce <- EmbryoAtlasData()
+sce <- EmbryoAtlasData(subsample.frac = 0.2, subsample.seed = 42)
 sce
 ```
 
@@ -68,9 +69,9 @@ Size factors for normalisation are present in the object and are accessed with t
 head(sizeFactors(sce))
 ```
 
-After running `scater::normalize` on the `r Biocpkg(SingleCellExperiment)` object, normalised counts can be accessed using `normcounts()`.
-Similarly, log-transformed normalised counts may be accessed using `logcounts()`
-These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg(scater)`.
+After running `r Biocpkg("scater")`'s `normalize` function on the `r Biocpkg("SingleCellExperiment")` object, normalised counts can be accessed using `normcounts`.
+Similarly, log-transformed normalised counts may be accessed using `logcounts`
+These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg("scater")`.
 
 The MGI symbol for each gene is stored in the `rowData` of the `SingleCellExperiment` object.
 
@@ -91,7 +92,7 @@ This representation contains `NA` values for cells that are doublets, or cytopla
 A vector of celltype colours (as used in the paper) is also provided, and is accessible via `data(embryo_celltype_colours)`.
 Its use is shown below.
 
-```{r}
+```{r, fig.height = 6}
 data(embryo_celltype_colours)
 head(embryo_celltype_colours, n=3)
 #exclude technical artefacts
@@ -109,7 +110,7 @@ plot(
 ## Raw data access
 
 Unfiltered count matrices are also available from `r Biocpkg("MouseGastrulationData")`.
-This refers to count matrices where swapped molecules have been removed but no cells have been called, 
+This refers to count matrices where swapped molecules have been removed but no cells have been called.
 They can be obtained using the `EmbryoAtlasData()` function and are returned as `SingleCellExperiment` objects.
 
 ```{r}

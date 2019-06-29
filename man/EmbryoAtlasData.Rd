@@ -4,10 +4,17 @@
 \alias{EmbryoAtlasData}
 \title{Mouse gastrulation timecourse data}
 \usage{
-EmbryoAtlasData(type = c("processed", "raw"), raw.samples = NULL)
+EmbryoAtlasData(type = c("processed", "raw"), subsample.frac = NULL,
+  subsample.seed = NULL, raw.samples = NULL)
 }
 \arguments{
 \item{type}{String specifying the type of data to obtain, see Details.}
+
+\item{subsample.frac}{Fraction of cells from the processed dataset to return.
+Cells are sampled entirely at random. Value should be more than 0 and less than 1.
+Default behaviour is to return all cells.}
+
+\item{subsample.seed}{Seed for the sampling step (see \code{subsample.frac}).}
 
 \item{raw.samples}{Integer or character vector specifying the samples for which raw count matrices should be obtained.
 If \code{NULL}, raw count matrices are returned for all (36) samples.}
