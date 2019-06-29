@@ -52,7 +52,8 @@ We load in only 20% of the cells in the full dataset to reduce the resources req
 
 ```{r, message=FALSE}
 library(MouseGastrulationData)
-sce <- EmbryoAtlasData(subsample.frac = 0.2, subsample.seed = 42)
+set.seed(42)
+sce <- EmbryoAtlasData(subsample.frac = 0.2)
 sce
 ```
 
