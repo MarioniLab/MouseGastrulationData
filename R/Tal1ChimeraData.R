@@ -3,12 +3,13 @@
 #' Obtain the processed or raw counts for the Tal1 chimeric mouse embryo dataset.
 #'
 #' @param type String specifying the type of data to obtain, see Details.
+#' Default behaviour is to return processed data.
 #' @param subsample.frac Fraction of cells from the processed dataset to return.
 #' Cells are sampled entirely at random. Value should be more than 0 and less than 1.
-#' Default behaviour is to return all cells. Note that for repeatable subsampling
+#' If \code{NULL} (default), all cells are returned. Note that for repeatable subsampling
 #' the user must set a seed before calling this function.
 #' @param raw.samples Integer or character vector specifying the samples for which raw count matrices should be obtained.
-#' If \code{NULL}, raw count matrices are returned for all (four) samples.
+#' If \code{NULL} (default), raw count matrices are returned for all (four) samples.
 #'
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from all sapmles.
@@ -72,5 +73,5 @@
 Tal1ChimeraData <- function(type=c("processed", "raw"), subsample.frac=NULL, raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
-    getProcOrRaw(host, type, raw.samples, subsample.frac, raw.options=as.character(seq_len(4)), raw.err="1:4")
+    .getProcOrRaw(host, type, raw.samples, subsample.frac, raw.options=as.character(seq_len(4)), raw.err="1:4")
 }

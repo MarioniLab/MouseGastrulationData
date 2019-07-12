@@ -5,7 +5,7 @@
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom S4Vectors List
 #' @importFrom methods as
-getProcOrRaw <- function(host, type, raw.samples, subsample.frac, raw.options, raw.err) {
+.getProcOrRaw <- function(host, type, raw.samples, subsample.frac, raw.options, raw.err) {
     hub <- ExperimentHub()
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
     rowdata <- as(rowdata, "DataFrame")

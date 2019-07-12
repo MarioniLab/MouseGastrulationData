@@ -6,6 +6,8 @@
 #' @format A vector of hexcodes named according to the appropriate
 #' celltype; celltypes match those in the metadata.
 #' 
+#' @examples data(embryo_celltype_colours)
+#' 
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019).
 #' A single-cell molecular map of mouse gastrulation and early organogenesis.
