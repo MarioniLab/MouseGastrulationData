@@ -23,6 +23,29 @@ This study focuses on mouse gastrulation and organogenesis, providing transcript
 Datasets are provided as count matrices with additional feature- and sample-level metadata after processing.
 Raw sequencing data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
 
+# Installation
+
+The package may be installed from Bioconductor.
+Bioconductor packages can be accessed using the `r CRANpkg("BiocManager")` package.
+
+```{r getPackage, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+install.packages("BiocManager")
+BiocManager::install("MouseGastrulationData")
+```
+
+The development version of the package is also available from Github.
+
+```{r, eval = FALSE}
+BiocManager::install("MarioniLab/MouseGastrulationData")
+```
+
+Next, load the package in the typical way.
+
+```{r Load, message=FALSE}
+library(MouseGastrulationData)
+```
+
 # Processing overview
 
 Detailed methods are available in the methods that accompany [the paper](https://doi.org/10.1038/s41586-019-0933-9),
@@ -51,7 +74,6 @@ This section details how you can interact with the object.
 We load in only 20% of the cells in the full dataset to reduce the resources required to compile this vignette.
 
 ```{r, message=FALSE}
-library(MouseGastrulationData)
 set.seed(42)
 sce <- EmbryoAtlasData(subsample.frac = 0.2)
 sce
@@ -162,5 +184,11 @@ However, there are a few small differences:
 - Information for the proper pairing of samples from the same embryo pools can be found in the `colData` field `pool`.
 
 Unfiltered count matrices are also provided for each sample in these datasets.
+
+# Session Information
+
+```{r}
+sessionInfo()
+```
 
 # References
