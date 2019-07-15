@@ -14,7 +14,7 @@ A vector containing the colour hexcodes that were used
 in Pijuan-Sala et al.
 }
 \examples{
-head(EmbyroCelltypeColours)
+head(EmbryoCelltypeColours)
 
 }
 \references{

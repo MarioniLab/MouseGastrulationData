@@ -6,7 +6,7 @@
 #' @format A vector of hexcodes named according to the appropriate
 #' celltype; celltypes match those in the metadata.
 #'
-#' @examples head(EmbyroCelltypeColours)
+#' @examples head(EmbryoCelltypeColours)
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019).
