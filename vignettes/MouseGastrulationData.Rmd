@@ -112,7 +112,7 @@ head(colData(sce))
 Batch-corrected PCA representations of the data are available via the `reducedDim` function, in the `pca.corrected` slot.
 This representation contains `NA` values for cells that are doublets, or cytoplasm-stripped nuclei.
 
-A vector of celltype colours (as used in the paper) is also provided, and is accessible via `data(embryo_celltype_colours)`.
+A vector of celltype colours (as used in the paper) is also provided in the exported object `EmbryoCelltypeColours`.
 Its use is shown below.
 
 ```{r, fig.height = 6}
@@ -123,7 +123,7 @@ singlets <- which(!(colData(sce)$doublet | colData(sce)$stripped))
 plot(
     x = reducedDim(sce, "umap")[singlets, 1],
     y = reducedDim(sce, "umap")[singlets, 2],
-    col = embryo_celltype_colours[colData(sce)$celltype[singlets]],
+    col = EmbryoCelltypeColours[colData(sce)$celltype[singlets]],
     pch = 19,
     xaxt = "n", yaxt = "n",
     xlab = "UMAP1", ylab = "UMAP2"
