@@ -116,8 +116,6 @@ A vector of celltype colours (as used in the paper) is also provided in the expo
 Its use is shown below.
 
 ```{r, fig.height = 6}
-data(embryo_celltype_colours)
-head(embryo_celltype_colours, n=3)
 #exclude technical artefacts
 singlets <- which(!(colData(sce)$doublet | colData(sce)$stripped))
 plot(
