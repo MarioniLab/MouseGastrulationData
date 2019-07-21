@@ -1,14 +1,26 @@
 info <- data.frame(
     Title = sprintf("Tal1 chimera %s", 
-        c("processed counts", "rowData", "colData", "size factors", "reduced dimensions",
+        c(sprintf("processed counts (sample %i)", seq_len(4)),
+            sprintf("rowData (sample %i)", seq_len(4)),
+            sprintf("colData (sample %i)", seq_len(4)),
+            sprintf("size factors (sample %i)", seq_len(4)),
+            sprintf("reduced dimensions (sample %i)", seq_len(4)),
             sprintf("raw counts (sample %i)", seq_len(4)))
     ),
     Description = sprintf("%s for the Tal1 knock-out chimeric mouse embryo single-cell RNA-seq dataset", 
-        c("Processed count matrix", "Per-gene metadata", "Per-cell metadata", "Size factors", "Reduced dimensions",
+        c(sprintf("Processed counts for sample %i", seq_len(4)),
+            sprintf("Per-gene metadata for sample %i", seq_len(4)),
+            sprintf("Per-cell metadata for sample %i", seq_len(4)),
+            sprintf("Size factors for sample %i", seq_len(4)),
+            sprintf("Reduced dimensions for sample %i", seq_len(4)),
             sprintf("Raw counts for sample %i", seq_len(4)))
     ),
     RDataPath = file.path("MouseGastrulationData", "tal1-chimera", "1.0.0", 
-        c("counts-processed-all.rds", "rowdata.rds", "coldata.rds", "sizefac.rds", "reduced-dims.rds",
+        c(sprintf("counts-processed-sample%i.rds", seq_len(4)),
+            sprintf("rowdata-sample%i.rds", seq_len(4)),
+            sprintf("coldata-sample%i.rds", seq_len(4)),
+            sprintf("sizefac-sample%i.rds", seq_len(4)),
+            sprintf("reduced-dims-sample%i.rds", seq_len(4)),
             sprintf("counts-raw-sample%i.rds", seq_len(4)))
     ),
     BiocVersion="3.10",
@@ -17,10 +29,14 @@ info <- data.frame(
     SourceUrl=rep(
         c("https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data",
             "https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data/unfiltered"),
-        c(5, 4)
+        24
     ),
     SourceVersion=paste(
-        c("raw_counts.mtx.gz", "genes.tsv.gz", "meta.tab.gz", "sizefactors.tab.gz", "corrected_pcas_nodoubstripped.rds",
+        c(rep("raw_counts.mtx.gz", 4), 
+            rep("genes.tsv.gz", 4),
+            rep("meta.tab.gz", 4),
+            rep("sizefactors.tab.gz", 4),
+            rep("corrected_pcas.rds", 4),
             sprintf("sample_%i_unswapped.mtx.gz", seq_len(4))),
         sep=";"
     ),

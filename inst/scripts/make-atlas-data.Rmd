@@ -104,16 +104,26 @@ The UMAP coordinates from the `colData` are also saved; similarly, this excludes
 reducedDim(sce, "umap") <- umap
 ```
 
-We save each component of the `SingleCellExperiment` to file for upload to `r Biocpkg("ExperimentHub")`.
+We now save the data, splitting the large `SingleCellExperiment` object into smaller, sample-wise objects.
+We then upload these smaller files to `r Biocpkg("ExperimentHub")`.
+Splitting up the data allows easier access of specific subsets of the data, and also allows use of the data on low-memory machines.
 
 ```{r}
 base <- file.path("MouseGastrulationData", "atlas", "1.0.0")
 dir.create(base, recursive=TRUE, showWarnings=FALSE)
-saveRDS(counts(sce), file=file.path(base, "counts-processed-all.rds"))
-saveRDS(rowData(sce), file=file.path(base, "rowdata.rds"))
-saveRDS(colData(sce), file=file.path(base, "coldata.rds"))
-saveRDS(sizeFactors(sce), file=file.path(base, "sizefac.rds"))
-saveRDS(reducedDims(sce), file=file.path(base, "reduced-dims.rds"))
+for(samp in unique(sce$sample)){
+    sub <- sce[, sce$sample == samp]
+    saveRDS(counts(sub), 
+        file=paste0(base, "/counts-processed-sample", samp, ".rds"))
+    saveRDS(rowData(sub), 
+        file=paste0(base, "/rowdata-sample", samp, ".rds"))
+    saveRDS(colData(sub), 
+        file=paste0(base, "/coldata-sample", samp, ".rds"))
+    saveRDS(sizeFactors(sub), 
+        file=paste0(base, "/sizefac-sample", samp, ".rds"))
+    saveRDS(reducedDims(sub), 
+        file=paste0(base, "/reduced-dims-sample", samp, ".rds"))
+}
 ```
 
 # Setting up the raw data
