@@ -4,11 +4,11 @@
 #'
 #' @param type String specifying the type of data to obtain, see Details.
 #' Default behaviour is to return processed data.
-#' @param raw.samples Integer or character vector specifying the samples for which raw count matrices should be obtained.
+#' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 #' If \code{NULL} (default), raw count matrices are returned for all (36) samples.
 #' 
 #' @return 
-#' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from all sapmles.
+#' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
 #'
 #' If \code{type="raw"}, a \linkS4class{List} of SingleCellExperiments is returned,
 #' each containing the raw counts for a single sample.
@@ -54,9 +54,9 @@
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
-#' atlas.data <- EmbryoAtlasData()
+#' atlas.data <- EmbryoAtlasData(samples = 1)
 #'
-#' atlas.data <- EmbryoAtlasData(type="processed")
+#' atlas.data <- EmbryoAtlasData(type="processed", samples = 1)
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 
@@ -69,8 +69,8 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-EmbryoAtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
+EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
-    .getProcOrRaw(host, type, raw.samples, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
+    .getProcOrRaw(host, type, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
 }

@@ -5,41 +5,49 @@
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom S4Vectors List
 #' @importFrom methods as
-.getProcOrRaw <- function(host, type, raw.samples, raw.options, raw.err) {
+.getProcOrRaw <- function(host, type, samples, sample.options, sample.err) {
     hub <- ExperimentHub()
-    rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
-    rowdata <- as(rowdata, "DataFrame")
+    #default to all samples
+    if (is.null(samples)) {
+        samples <- sample.options
+    }
+    #check for sample boundaries
+    samples <- as.character(samples)
+    if (!all(samples %in% sample.options)) {
+        stop(sprintf("'samples' must be in %s", sample.err))
+    }
 
-    if (type=="processed") {
-        counts <- hub[hub$rdatapath==file.path(host, "counts-processed-all.rds")][[1]]
-        coldata <- hub[hub$rdatapath==file.path(host, "coldata.rds")][[1]]
-        sf <- hub[hub$rdatapath==file.path(host, "sizefac.rds")][[1]]
-        reducedDims <- hub[hub$rdatapath==file.path(host, "reduced-dims.rds")][[1]]
-        output <- SingleCellExperiment(
-            list(counts=counts), 
-            rowData=rowdata, 
-            colData=as(coldata, "DataFrame"),
-            reducedDims=reducedDims
-        )
-        sizeFactors(output) <- sf
+    rowdata <- hub[hub$rdatapath==file.path(host, "rowdata-sample1.rds")][[1]]
 
-    } else {
-        if (is.null(raw.samples)) {
-            raw.samples <- raw.options
+    if (type=="processed"){
+        sce <- SingleCellExperiment()
+        for(i in samples){
+            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-processed-sample%s.rds", i))][[1]]
+            coldata <- hub[hub$rdatapath==file.path(host, sprintf("coldata-sample%s.rds", i))][[1]]
+            sf <- hub[hub$rdatapath==file.path(host, sprintf("sizefac-sample%s.rds", i))][[1]]
+            reducedDims <- hub[hub$rdatapath==file.path(host, sprintf("reduced-dims-sample%s.rds", i))][[1]]
+            output <- SingleCellExperiment(
+                list(counts=counts),
+                rowData=rowdata,
+                colData=as(coldata, "DataFrame"),
+                reducedDims=reducedDims
+            )
+            sizeFactors(output) <- sf
+            if(i == samples[1]){
+                sce <- output
+            } else {
+                sce <- SingleCellExperiment::cbind(sce, output)
+            }
         }
-
-        raw.samples <- as.character(raw.samples)
-        if (!all(raw.samples %in% raw.options)) {
-            stop(sprintf("'raw.samples' must be in %s", raw.err))
-        }
-
+    return(sce)
+    } else if (type == "raw") {
         output <- List()
-        for (i in raw.samples) {
+        for (i in samples) {
             counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
             output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
         }
-    }
-
-    output
+    return(output)
+    } else {
+        stop("Incorrect 'type' provided.")
+    }    
 }
-

@@ -1,7 +1,7 @@
 ---
 title: Overview of the MouseGastrulationData datasets
 author: Jonathan Griffiths and Aaron Lun
-date: "Revised: June 5, 2019"
+date: "Revised: August 5, 2019"
 output:
   BiocStyle::html_document:
     toc_float: true
@@ -34,7 +34,7 @@ install.packages("BiocManager")
 BiocManager::install("MouseGastrulationData")
 ```
 
-The development version of the package is also available from Github.
+BiocManager also supports installation of the development version of the package from Github.
 
 ```{r, eval = FALSE}
 BiocManager::install("MarioniLab/MouseGastrulationData")
@@ -71,11 +71,11 @@ and `cluster_louvain` (from `r CRANpkg("igraph")`), and were annotated and merge
 
 The package provides the dataset in the form of a `SingleCellExperiment` object.
 This section details how you can interact with the object.
-We load in only 20% of the cells in the full dataset to reduce the resources required to compile this vignette.
+We load in only one of the samples from the atlas to reduce memory consumption when compiling this vignette.
 
 ```{r, message=FALSE}
 set.seed(42)
-sce <- EmbryoAtlasData(subsample.frac = 0.2)
+sce <- EmbryoAtlasData(samples = 21)
 sce
 ```
 
@@ -92,11 +92,10 @@ Size factors for normalisation are present in the object and are accessed with t
 head(sizeFactors(sce))
 ```
 
-After running `r Biocpkg("scater")`'s `normalize` function on the `r Biocpkg("SingleCellExperiment")` object, normalised counts can be accessed using `normcounts`.
-Similarly, log-transformed normalised counts may be accessed using `logcounts`
+After running `r Biocpkg("scater")`'s `normalize` function on the `r Biocpkg("SingleCellExperiment")` object, normalised or log-transformed counts can be accessed using `normcounts` and `logcounts`.
 These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg("scater")`.
 
-The MGI symbol for each gene is stored in the `rowData` of the `SingleCellExperiment` object.
+The MGI symbol and Ensembl gene ID for each gene is stored in the `rowData` of the `SingleCellExperiment` object.
 
 ```{r}
 head(rowData(sce))
@@ -135,7 +134,7 @@ This refers to count matrices where swapped molecules have been removed but no c
 They can be obtained using the `EmbryoAtlasData()` function and are returned as `SingleCellExperiment` objects.
 
 ```{r}
-unfilt <- EmbryoAtlasData(type="raw", raw.samples=c(12, 14))
+unfilt <- EmbryoAtlasData(type="raw", samples=c(1:2))
 sapply(unfilt, dim)
 ```
 

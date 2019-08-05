@@ -4,17 +4,17 @@
 \alias{EmbryoAtlasData}
 \title{Mouse gastrulation timecourse data}
 \usage{
-EmbryoAtlasData(type = c("processed", "raw"), raw.samples = NULL)
+EmbryoAtlasData(type = c("processed", "raw"), samples = NULL)
 }
 \arguments{
 \item{type}{String specifying the type of data to obtain, see Details.
 Default behaviour is to return processed data.}
 
-\item{raw.samples}{Integer or character vector specifying the samples for which raw count matrices should be obtained.
+\item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 If \code{NULL} (default), raw count matrices are returned for all (36) samples.}
 }
 \value{
-If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from all sapmles.
+If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
 
 If \code{type="raw"}, a \linkS4class{List} of SingleCellExperiments is returned,
 each containing the raw counts for a single sample.
@@ -62,9 +62,9 @@ This may be useful if performing analyses that need to account for the ambient R
 For both raw and processed data, the row metadata contains the Ensembl ID and MGI symbol for each gene.
 }
 \examples{
-atlas.data <- EmbryoAtlasData()
+atlas.data <- EmbryoAtlasData(samples = 1)
 
-atlas.data <- EmbryoAtlasData(type="processed")
+atlas.data <- EmbryoAtlasData(type="processed", samples = 1)
 
 }
 \references{
