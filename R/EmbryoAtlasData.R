@@ -4,10 +4,6 @@
 #'
 #' @param type String specifying the type of data to obtain, see Details.
 #' Default behaviour is to return processed data.
-#' @param subsample.frac Fraction of cells from the processed dataset to return.
-#' Cells are sampled entirely at random. Value should be more than 0 and less than 1.
-#' If \code{NULL} (default), all cells are returned. Note that for repeatable subsampling
-#' the user must set a seed before calling this function.
 #' @param raw.samples Integer or character vector specifying the samples for which raw count matrices should be obtained.
 #' If \code{NULL} (default), raw count matrices are returned for all (36) samples.
 #' 
@@ -73,7 +69,7 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-EmbryoAtlasData <- function(type=c("processed", "raw"), subsample.frac=NULL, raw.samples=NULL) {
+EmbryoAtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
     .getProcOrRaw(host, type, raw.samples, subsample.frac, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
