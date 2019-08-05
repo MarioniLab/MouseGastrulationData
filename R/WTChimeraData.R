@@ -78,5 +78,5 @@
 WTChimeraData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
-    .getProcOrRaw(host, type, raw.samples, subsample.frac, raw.options=as.character(seq_len(10)), raw.err="1:10")
+    .getProcOrRaw(host, type, raw.samples, raw.options=as.character(seq_len(10)), raw.err="1:10")
 }

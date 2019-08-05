@@ -72,5 +72,5 @@
 EmbryoAtlasData <- function(type=c("processed", "raw"), raw.samples=NULL) {
     type <- match.arg(type)
     host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
-    .getProcOrRaw(host, type, raw.samples, subsample.frac, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
+    .getProcOrRaw(host, type, raw.samples, raw.options=as.character(c(1:10, 12:37)), raw.err="1:10 or 12:37")
 }
