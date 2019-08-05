@@ -1,7 +1,7 @@
 info <- data.frame(
     Title = sprintf("Atlas %s", 
         c(sprintf("processed counts (sample %i)", c(1:10, 12:37)),
-            sprintf("rowData (sample %i)", c(1:10, 12:37)),
+            "rowData",
             sprintf("colData (sample %i)", c(1:10, 12:37)),
             sprintf("size factors (sample %i)", c(1:10, 12:37)),
             sprintf("reduced dimensions (sample %i)", c(1:10, 12:37)),
@@ -9,7 +9,7 @@ info <- data.frame(
     ),
     Description = sprintf("%s for the mouse embryo atlas single-cell RNA-seq dataset", 
         c(sprintf("Processed counts for sample %i", c(1:10, 12:37)),
-            sprintf("Per-gene metadata for sample %i", c(1:10, 12:37)),
+            "Per-gene metadata for all samples",
             sprintf("Per-cell metadata for sample %i", c(1:10, 12:37)),
             sprintf("Size factors for sample %i", c(1:10, 12:37)),
             sprintf("Reduced dimensions for sample %i", c(1:10, 12:37)),
@@ -17,7 +17,7 @@ info <- data.frame(
     ),
     RDataPath = file.path("MouseGastrulationData", "atlas", "1.0.0", 
         c(sprintf("counts-processed-sample%i.rds", c(1:10, 12:37)),
-            sprintf("rowdata-sample%i.rds", c(1:10, 12:37)),
+            "rowdata.rds",
             sprintf("coldata-sample%i.rds", c(1:10, 12:37)),
             sprintf("sizefac-sample%i.rds", c(1:10, 12:37)),
             sprintf("reduced-dims-sample%i.rds", c(1:10, 12:37)),
@@ -28,11 +28,11 @@ info <- data.frame(
     SourceType="TXT",
     SourceUrl=rep(
         c("https://content.cruk.cam.ac.uk/jmlab/atlas_data"),
-        c(216)
+        c(36 * 5 + 1)
     ),
     SourceVersion=paste(
         c(rep("raw_counts.mtx.gz", 36), 
-            rep("genes.tsv.gz", 36),
+            "genes.tsv.gz",
             rep("meta.tab.gz", 36),
             rep("sizefactors.tab.gz", 36),
             rep("corrected_pcas.rds", 36),

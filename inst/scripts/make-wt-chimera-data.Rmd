@@ -99,12 +99,12 @@ Splitting up the data allows easier access of specific subsets of the data, and 
 ```{r}
 base <- file.path("MouseGastrulationData", "wt-chimera", "1.0.0")
 dir.create(base, recursive=TRUE, showWarnings=FALSE)
+#rowdata the same for all data
+saveRDS(rowData(sce), file=paste0(base, "/rowdata.rds"))
 for(samp in unique(sce$sample)){
     sub <- sce[, sce$sample == samp]
     saveRDS(counts(sub), 
         file=paste0(base, "/counts-processed-sample", samp, ".rds"))
-    saveRDS(rowData(sub), 
-        file=paste0(base, "/rowdata-sample", samp, ".rds"))
     saveRDS(colData(sub), 
         file=paste0(base, "/coldata-sample", samp, ".rds"))
     saveRDS(sizeFactors(sub), 

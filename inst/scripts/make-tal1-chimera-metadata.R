@@ -1,7 +1,7 @@
 info <- data.frame(
     Title = sprintf("Tal1 chimera %s", 
         c(sprintf("processed counts (sample %i)", seq_len(4)),
-            sprintf("rowData (sample %i)", seq_len(4)),
+            "rowData",
             sprintf("colData (sample %i)", seq_len(4)),
             sprintf("size factors (sample %i)", seq_len(4)),
             sprintf("reduced dimensions (sample %i)", seq_len(4)),
@@ -9,7 +9,7 @@ info <- data.frame(
     ),
     Description = sprintf("%s for the Tal1 knock-out chimeric mouse embryo single-cell RNA-seq dataset", 
         c(sprintf("Processed counts for sample %i", seq_len(4)),
-            sprintf("Per-gene metadata for sample %i", seq_len(4)),
+            "Per-gene metadata for all samples",
             sprintf("Per-cell metadata for sample %i", seq_len(4)),
             sprintf("Size factors for sample %i", seq_len(4)),
             sprintf("Reduced dimensions for sample %i", seq_len(4)),
@@ -17,7 +17,7 @@ info <- data.frame(
     ),
     RDataPath = file.path("MouseGastrulationData", "tal1-chimera", "1.0.0", 
         c(sprintf("counts-processed-sample%i.rds", seq_len(4)),
-            sprintf("rowdata-sample%i.rds", seq_len(4)),
+            "rowdata.rds",
             sprintf("coldata-sample%i.rds", seq_len(4)),
             sprintf("sizefac-sample%i.rds", seq_len(4)),
             sprintf("reduced-dims-sample%i.rds", seq_len(4)),
@@ -26,14 +26,17 @@ info <- data.frame(
     BiocVersion="3.10",
     Genome="mm10",
     SourceType="TXT",
-    SourceUrl=rep(
-        c("https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data",
-            "https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data/unfiltered"),
-        24
+    SourceUrl=c(
+        rep(
+            "https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data",
+            4 * 4 + 1),
+        rep(
+            "https://content.cruk.cam.ac.uk/jmlab/chimera_tal1_data/unfiltered",
+        4)
     ),
     SourceVersion=paste(
         c(rep("raw_counts.mtx.gz", 4), 
-            rep("genes.tsv.gz", 4),
+            "genes.tsv.gz",
             rep("meta.tab.gz", 4),
             rep("sizefactors.tab.gz", 4),
             rep("corrected_pcas.rds", 4),

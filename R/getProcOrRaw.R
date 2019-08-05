@@ -17,7 +17,7 @@
         stop(sprintf("'samples' must be in %s", sample.err))
     }
 
-    rowdata <- hub[hub$rdatapath==file.path(host, "rowdata-sample1.rds")][[1]]
+    rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
 
     if (type=="processed"){
         sce <- SingleCellExperiment()

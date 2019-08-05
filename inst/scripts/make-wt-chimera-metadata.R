@@ -1,7 +1,7 @@
 info <- data.frame(
     Title = sprintf("WT chimera %s", 
         c(sprintf("processed counts (sample %i)", seq_len(10)),
-            sprintf("rowData (sample %i)", seq_len(10)),
+            "rowData",
             sprintf("colData (sample %i)", seq_len(10)),
             sprintf("size factors (sample %i)", seq_len(10)),
             sprintf("reduced dimensions (sample %i)", seq_len(10)),
@@ -9,7 +9,7 @@ info <- data.frame(
     ),
     Description = sprintf("%s for the WT chimeric mouse embryo single-cell RNA-seq dataset", 
         c(sprintf("Processed counts for sample %i", seq_len(10)),
-            sprintf("Per-gene metadata for sample %i", seq_len(10)),
+            "Per-gene metadata for all samples",
             sprintf("Per-cell metadata for sample %i", seq_len(10)),
             sprintf("Size factors for sample %i", seq_len(10)),
             sprintf("Reduced dimensions for sample %i", seq_len(10)),
@@ -17,7 +17,7 @@ info <- data.frame(
     ),
     RDataPath = file.path("MouseGastrulationData", "wt-chimera", "1.0.0", 
         c(sprintf("counts-processed-sample%i.rds", seq_len(10)),
-            sprintf("rowdata-sample%i.rds", seq_len(10)),
+            "rowdata.rds",
             sprintf("coldata-sample%i.rds", seq_len(10)),
             sprintf("sizefac-sample%i.rds", seq_len(10)),
             sprintf("reduced-dims-sample%i.rds", seq_len(10)),
@@ -28,11 +28,11 @@ info <- data.frame(
     SourceType="TXT",
     SourceUrl=rep(
         c("https://content.cruk.cam.ac.uk/jmlab/chimera_wt_data"),
-        c(60)
+        10 * 5 + 1
     ),
     SourceVersion=paste(
         c(rep("raw_counts.mtx.gz", 10), 
-            rep("genes.tsv.gz", 10),
+            "genes.tsv.gz",
             rep("meta.tab.gz", 10),
             rep("sizefactors.tab.gz", 10),
             rep("corrected_pcas.rds", 10),
