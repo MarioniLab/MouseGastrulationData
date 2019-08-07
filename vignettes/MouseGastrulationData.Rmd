@@ -30,7 +30,7 @@ Bioconductor packages can be accessed using the `r CRANpkg("BiocManager")` packa
 
 ```{r getPackage, eval=FALSE}
 if (!requireNamespace("BiocManager", quietly = TRUE))
-install.packages("BiocManager")
+  install.packages("BiocManager")
 BiocManager::install("MouseGastrulationData")
 ```
 
@@ -40,7 +40,7 @@ BiocManager also supports installation of the development version of the package
 BiocManager::install("MarioniLab/MouseGastrulationData")
 ```
 
-Next, load the package in the typical way.
+To use the package, load it in the typical way.
 
 ```{r Load, message=FALSE}
 library(MouseGastrulationData)
@@ -66,6 +66,17 @@ The computational analysis involved a number of steps:
 and `cluster_louvain` (from `r CRANpkg("igraph")`), and were annotated and merged into interpretable units by hand.
 
 # Atlas data format
+
+The data accessible via this package is stored in subsets according to the different 10x samples that were generated.
+For the embryo atlas, the exported object `AtlasSampleMetadata` provides metadata information for each of the samples.
+Descriptions of the contents of each column can be accessed using `?AtlasSampleMetadata`
+
+```{r}
+head(AtlasSampleMetadata, n = 3)
+```
+
+All data access functions allow you to select the particular samples you would like to access.
+By loading only the samples that you are interested in for your particular analysis, you will save time when downloading and loading the data, and also reduce memory consumption on your machine.
 
 ## Processed data access
 
