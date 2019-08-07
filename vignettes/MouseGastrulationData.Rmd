@@ -74,7 +74,6 @@ This section details how you can interact with the object.
 We load in only one of the samples from the atlas to reduce memory consumption when compiling this vignette.
 
 ```{r, message=FALSE}
-set.seed(42)
 sce <- EmbryoAtlasData(samples = 21)
 sce
 ```
