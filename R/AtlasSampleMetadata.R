@@ -23,41 +23,45 @@
 #' \emph{Nature} 566, 7745:490-495.
 #'
 #' @export
-AtlasSampleMetadata <- do.call(rbind, list(
-    data.frame(sample=1, stage='E6.5', pool_index=1, seq_batch=1, ncells=360, stringsAsFactors = FALSE),
-    data.frame(sample=2, stage='E7.5', pool_index=2, seq_batch=1, ncells=356, stringsAsFactors = FALSE),
-    data.frame(sample=3, stage='E7.5', pool_index=3, seq_batch=1, ncells=458, stringsAsFactors = FALSE),
-    data.frame(sample=4, stage='E7.5', pool_index=4, seq_batch=1, ncells=276, stringsAsFactors = FALSE),
-    data.frame(sample=5, stage='E6.5', pool_index=5, seq_batch=1, ncells=1207, stringsAsFactors = FALSE),
-    data.frame(sample=6, stage='E7.5', pool_index=6, seq_batch=1, ncells=2798, stringsAsFactors = FALSE),
-    data.frame(sample=7, stage='E6.75', pool_index=7, seq_batch=1, ncells=2169, stringsAsFactors = FALSE),
-    data.frame(sample=8, stage='E7.75', pool_index=8, seq_batch=1, ncells=3254, stringsAsFactors = FALSE),
-    data.frame(sample=9, stage='E7.75', pool_index=8, seq_batch=1, ncells=3093, stringsAsFactors = FALSE),
-    data.frame(sample=10, stage='E7.0', pool_index=9, seq_batch=1, ncells=2359, stringsAsFactors = FALSE),
-    data.frame(sample=12, stage='E7.75', pool_index=11, seq_batch=2, ncells=5305, stringsAsFactors = FALSE),
-    data.frame(sample=13, stage='E7.75', pool_index=11, seq_batch=2, ncells=6068, stringsAsFactors = FALSE),
-    data.frame(sample=14, stage='E7.0', pool_index=12, seq_batch=2, ncells=1311, stringsAsFactors = FALSE),
-    data.frame(sample=15, stage='E7.0', pool_index=12, seq_batch=2, ncells=1620, stringsAsFactors = FALSE),
-    data.frame(sample=16, stage='E8.0', pool_index=13, seq_batch=2, ncells=6230, stringsAsFactors = FALSE),
-    data.frame(sample=17, stage='E8.5', pool_index=14, seq_batch=2, ncells=4483, stringsAsFactors = FALSE),
-    data.frame(sample=18, stage='E6.5', pool_index=15, seq_batch=2, ncells=2130, stringsAsFactors = FALSE),
-    data.frame(sample=19, stage='E7.5', pool_index=16, seq_batch=2, ncells=6996, stringsAsFactors = FALSE),
-    data.frame(sample=20, stage='E7.5', pool_index=16, seq_batch=2, ncells=1992, stringsAsFactors = FALSE),
-    data.frame(sample=21, stage='mixed_gastrulation', pool_index=17, seq_batch=2, ncells=4651, stringsAsFactors = FALSE),
-    data.frame(sample=22, stage='mixed_gastrulation', pool_index=17, seq_batch=2, ncells=4674, stringsAsFactors = FALSE),
-    data.frame(sample=23, stage='E7.25', pool_index=18, seq_batch=2, ncells=1429, stringsAsFactors = FALSE),
-    data.frame(sample=24, stage='E8.25', pool_index=19, seq_batch=2, ncells=6707, stringsAsFactors = FALSE),
-    data.frame(sample=25, stage='E8.25', pool_index=19, seq_batch=2, ncells=7289, stringsAsFactors = FALSE),
-    data.frame(sample=26, stage='E7.25', pool_index=20, seq_batch=2, ncells=6649, stringsAsFactors = FALSE),
-    data.frame(sample=27, stage='E7.25', pool_index=20, seq_batch=2, ncells=7216, stringsAsFactors = FALSE),
-    data.frame(sample=28, stage='E8.25', pool_index=21, seq_batch=2, ncells=4646, stringsAsFactors = FALSE),
-    data.frame(sample=29, stage='E8.5', pool_index=22, seq_batch=3, ncells=7569, stringsAsFactors = FALSE),
-    data.frame(sample=30, stage='E7.0', pool_index=23, seq_batch=3, ncells=3785, stringsAsFactors = FALSE),
-    data.frame(sample=31, stage='E7.0', pool_index=23, seq_batch=3, ncells=3778, stringsAsFactors = FALSE),
-    data.frame(sample=32, stage='E7.0', pool_index=23, seq_batch=3, ncells=3718, stringsAsFactors = FALSE),
-    data.frame(sample=33, stage='E8.0', pool_index=24, seq_batch=3, ncells=5443, stringsAsFactors = FALSE),
-    data.frame(sample=34, stage='E8.0', pool_index=24, seq_batch=3, ncells=5314, stringsAsFactors = FALSE),
-    data.frame(sample=35, stage='E8.0', pool_index=24, seq_batch=3, ncells=5072, stringsAsFactors = FALSE),
-    data.frame(sample=36, stage='E8.5', pool_index=25, seq_batch=3, ncells=4915, stringsAsFactors = FALSE),
-    data.frame(sample=37, stage='E8.5', pool_index=26, seq_batch=3, ncells=4011, stringsAsFactors = FALSE)
-))
+AtlasSampleMetadata <- read.table(
+    text = 
+        "sample,stage,pool_index,seq_batch,ncells
+        1,E6.5,1,1,360
+        2,E7.5,2,1,356
+        3,E7.5,3,1,458
+        4,E7.5,4,1,276
+        5,E6.5,5,1,1207
+        6,E7.5,6,1,2798
+        7,E6.75,7,1,2169
+        8,E7.75,8,1,3254
+        9,E7.75,8,1,3093
+        10,E7.0,9,1,2359
+        12,E7.75,11,2,5305
+        13,E7.75,11,2,6068
+        14,E7.0,12,2,1311
+        15,E7.0,12,2,1620
+        16,E8.0,13,2,6230
+        17,E8.5,14,2,4483
+        18,E6.5,15,2,2130
+        19,E7.5,16,2,6996
+        20,E7.5,16,2,1992
+        21,mixed_gastrulation,17,2,4651
+        22,mixed_gastrulation,17,2,4674
+        23,E7.25,18,2,1429
+        24,E8.25,19,2,6707
+        25,E8.25,19,2,7289
+        26,E7.25,20,2,6649
+        27,E7.25,20,2,7216
+        28,E8.25,21,2,4646
+        29,E8.5,22,3,7569
+        30,E7.0,23,3,3785
+        31,E7.0,23,3,3778
+        32,E7.0,23,3,3718
+        33,E8.0,24,3,5443
+        34,E8.0,24,3,5314
+        35,E8.0,24,3,5072
+        36,E8.5,25,3,4915
+        37,E8.5,26,3,4011",
+    header = TRUE,
+    sep = ",",
+    stringsAsFactors = FALSE)
