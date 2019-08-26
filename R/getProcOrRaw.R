@@ -28,7 +28,6 @@
             reducedDims <- hub[hub$rdatapath==file.path(host, sprintf("reduced-dims-sample%s.rds", i))][[1]]
             output <- SingleCellExperiment(
                 list(counts=counts),
-                rowData=rowdata,
                 colData=as(coldata, "DataFrame"),
                 reducedDims=reducedDims
             )
@@ -39,14 +38,15 @@
                 sce <- SingleCellExperiment::cbind(sce, output)
             }
         }
-    return(sce)
+        rowData(sce) <- rowdata
+        return(sce)
     } else if (type == "raw") {
         output <- List()
         for (i in samples) {
             counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
             output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
         }
-    return(output)
+        return(output)
     } else {
         stop("Incorrect 'type' provided.")
     }    
