@@ -13,7 +13,7 @@
     }
     #check for sample boundaries
     samples <- as.character(samples)
-    if (!all(samples %in% sample.options)) {
+    if (!all(samples %in% sample.options) | length(samples)==0) {
         stop(sprintf("'samples' must be in %s", sample.err))
     }
 
