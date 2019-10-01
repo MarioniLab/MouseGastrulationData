@@ -192,6 +192,16 @@ However, there are a few small differences:
 
 Unfiltered count matrices are also provided for each sample in these datasets.
 
+# Working with the data outside of *Bioconductor*
+
+A user might want to use these data outside of the *Bioconductor* framework in which it is provided from this package.
+Fortunately, there are several packages available for *R* that facilitate this.
+The `r Biocpkg("LoomExperiment")` package will allow you to save the data as a `.loom` file, which would be easily imported into python for use with e.g. *scanpy*.
+Alternatively, you might want to consider `r Githubpkg("mojaveazure/loomR")`, which is available through *Github*.
+`r CRANpkg("Seurat")` has a function `as.Seurat` to directly convert SingleCellExperiment files directly to *Seurat*-friendly objects.
+
+In any case, it is likely that this package is the easiest way to access the mouse gastrulation datasets, regardless of how you wish to analyse it downstream.
+
 # Session Information
 
 ```{r}
