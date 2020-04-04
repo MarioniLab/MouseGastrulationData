@@ -20,36 +20,40 @@
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
 
     if (type=="processed"){
-        sce <- SingleCellExperiment()
-        for(i in samples){
-            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-processed-sample%s.rds", i))][[1]]
-            coldata <- hub[hub$rdatapath==file.path(host, sprintf("coldata-sample%s.rds", i))][[1]]
-            sf <- hub[hub$rdatapath==file.path(host, sprintf("sizefac-sample%s.rds", i))][[1]]
-            reducedDims <- hub[hub$rdatapath==file.path(host, sprintf("reduced-dims-sample%s.rds", i))][[1]]
-            output <- SingleCellExperiment(
-                list(counts=counts),
-                colData=as(coldata, "DataFrame"),
-                reducedDims=reducedDims
+        count_list <- lapply(samples, function(i){
+            hub[hub$rdatapath==file.path(host, sprintf("counts-processed-sample%s.rds", i))][[1]]
+        })
+        coldata_list <- lapply(samples, function(i){
+            hub[hub$rdatapath==file.path(host, sprintf("coldata-sample%s.rds", i))][[1]]
+        })
+        sf_list <- lapply(samples, function(i){
+            hub[hub$rdatapath==file.path(host, sprintf("sizefac-sample%s.rds", i))][[1]]
+        })
+        reducedDims_list <- lapply(samples, function(i){
+            hub[hub$rdatapath==file.path(host, sprintf("reduced-dims-sample%s.rds", i))][[1]]
+        })
+        combined_pca <- do.call(rbind, lapply(reducedDims_list, function(x) x$pca.corrected))
+        combined_umap <- do.call(rbind, lapply(reducedDims_list, function(x) x$umap))
+        sce <- SingleCellExperiment(
+                assays=list(counts=do.call(Matrix::cbind, count_list)),
+                colData=as(do.call(rbind, coldata_list), "DataFrame"),
+                reducedDims=list(pca.corrected = combined_pca, umap = combined_umap),
+                rowData=rowdata
             )
-            sizeFactors(output) <- sf
-            if(i == samples[1]){
-                sce <- output
-            } else {
-                sce <- SingleCellExperiment::cbind(sce, output)
-            }
-        }
-        rowData(sce) <- rowdata
+        sizeFactors(sce) <- do.call(c, sf_list)
         rownames(sce) <- rowData(sce)$ENSEMBL
         colnames(sce) <- colData(sce)$cell
         return(sce)
     } else if (type == "raw") {
-        output <- List()
-        for (i in samples) {
-            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
-            output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
-            rownames(output[[i]]) <- rowData(output[[i]])$ENSEMBL
-        }
-        return(output)
+        count_list <- lapply(samples, function(i){
+            hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
+        })
+        sce <- SingleCellExperiment(
+                assays=list(counts=do.call(cbind, count_list)), 
+                rowData=rowdata
+            )
+        rownames(sce) <- rowData(sce)$ENSEMBL
+        return(sce)
     } else {
         stop("Incorrect 'type' provided.")
     }    
