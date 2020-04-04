@@ -35,7 +35,7 @@
         combined_pca <- do.call(rbind, lapply(reducedDims_list, function(x) x$pca.corrected))
         combined_umap <- do.call(rbind, lapply(reducedDims_list, function(x) x$umap))
         sce <- SingleCellExperiment(
-                assays=list(counts=do.call(Matrix::cbind, count_list)),
+                assays=list(counts=do.call(cbind, count_list)),
                 colData=as(do.call(rbind, coldata_list), "DataFrame"),
                 reducedDims=list(pca.corrected = combined_pca, umap = combined_umap),
                 rowData=rowdata
