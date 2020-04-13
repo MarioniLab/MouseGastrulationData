@@ -1,6 +1,6 @@
 Package: MouseGastrulationData
 Title: Single-Cell Transcriptomics Data across Mouse Gastrulation and Early Organogenesis
-Version: 0.99.12
+Version: 1.0.1
 Authors@R: c(
     person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")),
     person("Aaron", "Lun", email = "infinite.monkeys.with.keyboards@gmail.com", role = "aut"))
@@ -27,4 +27,4 @@ Encoding: UTF-8
 biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData, SingleCellData, ExperimentHub
 URL: https://github.com/MarioniLab/MouseGastrulationData
 BugReports: https://github.com/MarioniLab/MouseGastrulationData/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.1.0

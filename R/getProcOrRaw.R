@@ -20,34 +20,40 @@
     rowdata <- hub[hub$rdatapath==file.path(host, "rowdata.rds")][[1]]
 
     if (type=="processed"){
-        sce <- SingleCellExperiment()
-        for(i in samples){
-            counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-processed-sample%s.rds", i))][[1]]
-            coldata <- hub[hub$rdatapath==file.path(host, sprintf("coldata-sample%s.rds", i))][[1]]
-            sf <- hub[hub$rdatapath==file.path(host, sprintf("sizefac-sample%s.rds", i))][[1]]
-            reducedDims <- hub[hub$rdatapath==file.path(host, sprintf("reduced-dims-sample%s.rds", i))][[1]]
-            output <- SingleCellExperiment(
-                list(counts=counts),
-                colData=as(coldata, "DataFrame"),
-                reducedDims=reducedDims
-            )
-            sizeFactors(output) <- sf
-            if(i == samples[1]){
-                sce <- output
-            } else {
-                sce <- SingleCellExperiment::cbind(sce, output)
-            }
+        # Temporary function for data extraction
+        EXTRACTOR <- function(target) {
+            lapply(samples, function(i){
+                hub[hub$rdatapath==file.path(host, sprintf("%s-sample%s.rds", target, i))][[1]]
+            })
         }
-        rowData(sce) <- rowdata
-        rownames(sce) <- rowData(sce)$ENSEMBL
-        colnames(sce) <- colData(sce)$cell
+        count_list <- EXTRACTOR("counts-processed")
+        coldata_list <- EXTRACTOR("coldata")
+        sf_list <- EXTRACTOR("sizefac")
+        reducedDims_list <- EXTRACTOR("reduced-dims")
+
+        # Handle data with different reducedDim names
+        reducedDims_names = names(reducedDims_list[[1]])
+        reducedDims_combined = lapply(reducedDims_names, function(x){
+            do.call(rbind, lapply(reducedDims_list, function(y) y[[x]]))
+        })
+        names(reducedDims_combined) = reducedDims_names
+
+        sce <- SingleCellExperiment(
+                assays=list(counts=do.call(cbind, count_list)),
+                colData=as(do.call(rbind, coldata_list), "DataFrame"),
+                reducedDims=reducedDims_combined,
+                rowData=rowdata
+            )
+        sizeFactors(sce) <- unlist(sf_list)
+        rownames(sce) <- SingleCellExperiment::rowData(sce)$ENSEMBL
+        colnames(sce) <- SingleCellExperiment::colData(sce)$cell
         return(sce)
     } else if (type == "raw") {
         output <- List()
         for (i in samples) {
             counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
             output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
-            rownames(output[[i]]) <- rowData(output[[i]])$ENSEMBL
+            rownames(output[[i]]) <- SingleCellExperiment::rowData(output[[i]])$ENSEMBL
         }
         return(output)
     } else {

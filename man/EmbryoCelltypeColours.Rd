@@ -4,8 +4,10 @@
 \name{EmbryoCelltypeColours}
 \alias{EmbryoCelltypeColours}
 \title{Celltype colours from Pijuan-Sala et al.}
-\format{A vector of hexcodes named according to the appropriate
-celltype; celltypes match those in the metadata.}
+\format{
+A vector of hexcodes named according to the appropriate
+celltype; celltypes match those in the metadata.
+}
 \usage{
 EmbryoCelltypeColours
 }
