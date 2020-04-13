@@ -4,7 +4,8 @@
 \name{AtlasSampleMetadata}
 \alias{AtlasSampleMetadata}
 \title{Sample metadata from the Pijuan-Sala et al. embryo atlas}
-\format{A data frame containing information for each 10x sample
+\format{
+A data frame containing information for each 10x sample
 of the embryo atlas.
 This object contains:
 \describe{
@@ -14,7 +15,8 @@ This object contains:
 \item{\code{seq_batch}:}{Integer, seqencing batch index; samples with the same values were multiplexed for sequencing.}
 \item{\code{ncells}:}{Integer, number of cells (post-QC) per sample.}
 }
-Note that sample 11 is missing by design due to experimental failure: it is not available for download.}
+Note that sample 11 is missing by design due to experimental failure: it is not available for download.
+}
 \usage{
 AtlasSampleMetadata
 }
