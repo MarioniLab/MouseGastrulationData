@@ -16,4 +16,4 @@ Blanca Pijuan-Sala<sup>\*</sup>, Jonathan A. Griffiths<sup>\*</sup>, Carolina Gu
 
 ## Acknowledgement
 
-Thanks to Aaron Lun, on whose work on the [scRNAseq](https://github.com/drisso/scRNAseq/tree/ehub) package this package is based.
+Thanks to Aaron Lun, on whose work on the [scRNAseq](https://github.com/LTLA/scRNAseq/) package this package is based.

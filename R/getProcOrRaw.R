@@ -5,6 +5,8 @@
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom S4Vectors List
 #' @importFrom methods as
+#' @importFrom SummarizedExperiment rowData
+#' @importFrom SummarizedExperiment colData
 .getProcOrRaw <- function(host, type, samples, sample.options, sample.err) {
     hub <- ExperimentHub()
     #default to all samples
@@ -45,15 +47,15 @@
                 rowData=rowdata
             )
         sizeFactors(sce) <- unlist(sf_list)
-        rownames(sce) <- SingleCellExperiment::rowData(sce)$ENSEMBL
-        colnames(sce) <- SingleCellExperiment::colData(sce)$cell
+        rownames(sce) <- rowData(sce)$ENSEMBL
+        colnames(sce) <- colData(sce)$cell
         return(sce)
     } else if (type == "raw") {
         output <- List()
         for (i in samples) {
             counts <- hub[hub$rdatapath==file.path(host, sprintf("counts-raw-sample%s.rds", i))][[1]]
             output[[i]] <- SingleCellExperiment(list(counts=counts), rowData=rowdata)
-            rownames(output[[i]]) <- SingleCellExperiment::rowData(output[[i]])$ENSEMBL
+            rownames(output[[i]]) <- rowData(output[[i]])$ENSEMBL
         }
         return(output)
     } else {
