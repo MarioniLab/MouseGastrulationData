@@ -1,6 +1,6 @@
 Package: MouseGastrulationData
 Title: Single-Cell Transcriptomics Data across Mouse Gastrulation and Early Organogenesis
-Version: 1.1.2
+Version: 1.1.3
 Authors@R: c(
     person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")),
     person("Aaron", "Lun", email = "infinite.monkeys.with.keyboards@gmail.com", role = "aut"))
