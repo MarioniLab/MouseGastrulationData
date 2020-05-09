@@ -53,4 +53,4 @@ info <- data.frame(
     stringsAsFactors = FALSE
 )
 
-write.csv(file="../extdata/metadata-tal1-chimera.csv", info, row.names=FALSE)
+write.csv(file="../../extdata/metadata-tal1-chimera.csv", info, row.names=FALSE)

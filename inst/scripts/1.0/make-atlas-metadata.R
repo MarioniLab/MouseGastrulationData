@@ -49,4 +49,4 @@ info <- data.frame(
     stringsAsFactors = FALSE
 )
 
-write.csv(file="../extdata/metadata-atlas.csv", info, row.names=FALSE)
+write.csv(file="../../extdata/metadata-atlas.csv", info, row.names=FALSE)
