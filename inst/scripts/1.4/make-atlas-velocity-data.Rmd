@@ -1,0 +1,74 @@
+---
+title: Preparing the velocity count matrices from the atlas dataset for _ExperimentHub_
+author: Jonathan Griffiths
+date: 9 May 2020
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+```{r style, echo=FALSE, results='hide', message=FALSE}
+library(BiocStyle)
+knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Overview
+
+Here, we prepare spliced, unspliced, and ambiguous count matrices from a single-cell RNA sequencing timecourse dataset of mouse gastrulation and early organogenesis.
+This dataset is from Pijuan-Sala et al. (2019).
+Whole mouse embryos were harvested and dissociated at 6-hour timepoints between embryonic day (E) 6.5 and 8.5.
+Most timepoints contain several replicate samples.
+These data do not have the same unswapping procedure performed on them as in the main atlas dataset due to the process of estimating spliced count abundances working from the aligned read bam file, and the unswapping process working from the molecule information file, which is downstream of the bam.
+
+# Preparing the processed data
+
+We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
+This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
+
+```{r}
+library(BiocFileCache)
+bfc <- BiocFileCache("raw_data", ask=FALSE)
+library(Matrix)
+splice_types <- c("spliced", "unspliced", "ambiguous")
+splice_paths <- lapply(splice_types, function(x){
+    sapply(c(1:10, 12:37), function(y){
+        bfcrpath(bfc, file.path("https://content.cruk.cam.ac.uk/",
+            "jmlab/atlas_data/velocyto",
+            paste0(x, "-counts-processed-sample", y, ".mtx.gz")))
+    })
+})
+names(splice_paths) <- splice_types
+spliced_mats <- lapply(splice_paths[[1]], readMM)
+unspliced_mats <- lapply(splice_paths[[2]], readMM)
+ambig_mats <- lapply(splice_paths[[3]], readMM)
+```
+These files are organised in the same way (i.e., rows and columns are the same genes and cells) as the count matrix from the main part of the dataset.
+We can demonstrate this by considering the correlation of cell expression vectors between the spliced RNA matrix and the total RNA matrix, shown below.
+
+```{r}
+library(MouseGastrulationData)
+atlas1 <- EmbryoAtlasData(samples = 1)
+summary(sapply(1:100, function(x)
+    cor(spliced_mats[[1]][,x], counts(atlas1)[,x], method = "spearman")))
+```
+We now save these data as rds files for upload to ExperimentHub.
+
+```{r}
+base <- file.path("MouseGastrulationData", "atlas", "1.4.0")
+dir.create(base, recursive=TRUE, showWarnings=FALSE)
+for(samp in 1:36){
+    samp_name <- samp
+    if(samp>=11) samp_name <- samp + 1 #correct for absent sample 11
+    saveRDS(spliced_mats[[samp]],
+            paste0(base, "/counts-spliced-sample", samp_name, ".rds"))
+    saveRDS(unspliced_mats[[samp]],
+            paste0(base, "/counts-unspliced-sample", samp_name, ".rds"))
+    saveRDS(ambig_mats[[samp]],
+            paste0(base, "/counts-ambig-sample", samp_name, ".rds"))
+}
+```
+# Session information
+
+```{r}
+sessionInfo()
+```
