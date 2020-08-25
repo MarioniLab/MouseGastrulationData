@@ -5,7 +5,7 @@
 #' @param type String specifying the type of data to obtain, see Details.
 #' Default behaviour is to return processed data.
 #' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
-#' If \code{NULL} (default), raw count matrices are returned for all (four) samples.
+#' If \code{NULL} (default), data are returned for all (four) samples.
 #'
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
