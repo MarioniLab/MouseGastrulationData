@@ -11,7 +11,7 @@ Tal1ChimeraData(type = c("processed", "raw"), samples = NULL)
 Default behaviour is to return processed data.}
 
 \item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
-If \code{NULL} (default), raw count matrices are returned for all (four) samples.}
+If \code{NULL} (default), data are returned for all (four) samples.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.

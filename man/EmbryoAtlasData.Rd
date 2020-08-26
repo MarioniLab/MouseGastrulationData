@@ -11,7 +11,7 @@ EmbryoAtlasData(type = c("processed", "raw"), samples = NULL)
 Default behaviour is to return processed data.}
 
 \item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
-If \code{NULL} (default), raw count matrices are returned for all (36) samples.}
+If \code{NULL} (default), data are returned for all (36) samples.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
@@ -41,7 +41,7 @@ The column metadata for called cells contains:
 \item{\code{stage}:}{Character, stage of the mouse embryo at which the sample was taken.}
 \item{\code{sequencing.batch}:}{Integer, sequencing run in which sample was multiplexed.}
 \item{\code{theiler}:}{Character, Theiler stage from which the sample was taken; alternative scheme to \code{stage}.}
-\item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
+\item{\code{doub.density}:}{Numeric, output of (a now-outdated run of) \code{scran::doubletCells}, performed on each sample separately.}
 \item{\code{doublet}:}{Logical, whether a cell was called as a doublet.}
 \item{\code{cluster}:}{Integer, top-level cluster to which cell was assigned across all samples.}
 \item{\code{cluster.sub}:}{Integer, cluster to which cell was assigned when clustered within each \code{cluster}.}

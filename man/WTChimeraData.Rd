@@ -11,7 +11,7 @@ WTChimeraData(type = c("processed", "raw"), samples = NULL)
 Default behaviour is to return processed data.}
 
 \item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
-If \code{NULL} (default), raw count matrices are returned for all (ten) samples.}
+If \code{NULL} (default), data are returned for all (ten) samples.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples
@@ -57,7 +57,7 @@ The column metadata for called cells contains:
 \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
 \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{EmbryoAtlasData}}) after MNN mapping.}
-\item{\code{doub.density}:}{Numeric, output of (a now-oudated run of) \code{scran::doubletCells}, performed on each sample separately.}
+\item{\code{doub.density}:}{Numeric, output of (a now-outdated run of) \code{scran::doubletCells}, performed on each sample separately.}
 }
 
 The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
