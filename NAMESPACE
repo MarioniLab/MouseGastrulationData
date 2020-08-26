@@ -3,6 +3,7 @@
 export(AtlasSampleMetadata)
 export(EmbryoAtlasData)
 export(EmbryoCelltypeColours)
+export(TChimeraData)
 export(Tal1ChimeraData)
 export(WTChimeraData)
 importClassesFrom(S4Vectors,DataFrame)
