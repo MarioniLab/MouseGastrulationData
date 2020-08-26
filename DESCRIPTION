@@ -8,7 +8,7 @@ Description:
     Provides processed and raw count matrices for single-cell RNA sequencing data 
     from a timecourse of mouse gastrulation and early organogenesis.
 Depends: 
-    R (>= 3.6.0),
+    R (>= 4.0),
     SingleCellExperiment,
     SummarizedExperiment
 Imports:
