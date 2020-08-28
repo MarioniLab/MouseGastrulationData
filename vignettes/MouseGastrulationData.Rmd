@@ -1,7 +1,7 @@
 ---
 title: Overview of the MouseGastrulationData datasets
 author: Jonathan Griffiths and Aaron Lun
-date: "Revised: August 5, 2019"
+date: "Revised: August 28, 2020"
 output:
   BiocStyle::html_document:
     toc_float: true
@@ -35,10 +35,8 @@ BiocManager::install("MouseGastrulationData")
 ```
 
 BiocManager also supports installation of the development version of the package from Github.
-
-```{r, eval = FALSE}
-BiocManager::install("MarioniLab/MouseGastrulationData")
-```
+However, I would recommend that you use the _Bioconductor_ development version of the package, as development versions of the package may have dependencies on development versions of other _Bioconductor_ packages.
+Instructions for installation of _Bioconductor_ devel. are available [on their website](https://www.bioconductor.org/developers/how-to/useDevel/).
 
 To use the package, load it in the typical way.
 
@@ -175,13 +173,18 @@ The package contains two chimeric datasets:
 - Wild-type chimeras involving ten samples, from five independant embryo pools at two timepoints.
 The injected wild-type cells differ only in the insertion of the *td-Tomato* construct.
 These data are useful for identifying properties of a typical chimera in *scRNAseq* data.
-Raw sequencing data are available at [E-MTAB-7324](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7324/).
+Raw sequencing data are available at [E-MTAB-7324](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7324/) for samples 1-6, and [E-MTAB-8812](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-8812/) for samples 7-10.
 The data can be accessed using the `WTChimeraData()` function.
 - *Tal1* knockout chimeras involving four samples, from one embryo pool at one timepoint.
-The injected cells in the *Tal1* chimeras have are knockouts for the *Tal1* gene.
+The injected cells in the *Tal1* chimeras have knockouts for the *Tal1* gene.
 They also contain the *td-Tomato* construct.
 Raw sequencing data are available at [E-MTAB-7325](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-7325/).
 The data can be accessed using the `Tal1ChimeraData()` function.
+- *T* (*Brachyury*) knockout chimeras involving sixteen samples, from eight embryo pools at two timepoints.
+The injected cells in the *T* chimeras have knockouts for the *T* gene.
+They also contain the *td-Tomato* construct.
+Raw sequencing data are available at [E-MTAB-8811](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-8811/).
+The data can be accessed using the `TChimeraData()` function.
 
 The processed data for each experiment are provided as a `SingleCellExperiment`, as for the previously described atlas data.
 However, there are a few small differences:
@@ -190,6 +193,7 @@ However, there are a few small differences:
 - Cells derived from the injected cells (and thus are positive for *td-Tomato*) are marked in the `colData` field `tomato`.
 - Information for the proper pairing of samples from the same embryo pools can be found in the `colData` field `pool`.
 
+There may also be additional columns in the cell metadata for individual experiments, the meanings of which are described in the help pages for each function.
 Unfiltered count matrices are also provided for each sample in these datasets.
 
 # Working with the data outside of *Bioconductor*
