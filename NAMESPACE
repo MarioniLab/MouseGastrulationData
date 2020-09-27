@@ -3,6 +3,7 @@
 export(AtlasSampleMetadata)
 export(EmbryoAtlasData)
 export(EmbryoCelltypeColours)
+export(GuibentifExtraData)
 export(TChimeraData)
 export(Tal1ChimeraData)
 export(WTChimeraData)
