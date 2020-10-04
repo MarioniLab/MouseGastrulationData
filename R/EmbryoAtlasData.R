@@ -6,6 +6,7 @@
 #' Default behaviour is to return processed data.
 #' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 #' If \code{NULL} (default), data are returned for all (36) samples.
+#' @param get.spliced Logical indicating whether to also download the spliced/unspliced/ambiguously spliced count matrices.
 #' 
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
@@ -44,6 +45,8 @@
 #' \item{\code{umapX}:}{Numeric, x-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' }
+#' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+#' If spliced counts were requested, these will be in the assays slot of the SingleCellExperiment object.
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 #' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
@@ -69,8 +72,11 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL) {
+EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.spliced=FALSE) {
     type <- match.arg(type)
-    host <- file.path("MouseGastrulationData", "atlas", "1.0.0")
-    .getProcOrRaw(host, type, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
+    versions <- list(base="1.0.0")
+    if(get.spliced){
+        versions <- c(versions, list(spliced="1.4.0"))
+    }
+    .getProcOrRaw("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
 }

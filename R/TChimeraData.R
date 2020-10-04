@@ -60,6 +60,7 @@
 #' \item{\code{somite.subct.mapped}:}{Character, somite subcluster to which cells mapped.}
 #' \item{\code{sizeFactor}:}{Numeric, cell sizefactor.}
 #' }
+#' #' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 #' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
@@ -89,6 +90,6 @@ TChimeraData <- function(type=c("processed", "raw"), samples=c(1:2, 5:16)) {
     if(any(3:4 %in% samples))
         warning("You are downloading the QC-fail samples 3 and/or 4.")
     type <- match.arg(type)
-    host <- file.path("MouseGastrulationData", "t-chimera", "1.4.0")
-    .getProcOrRaw(host, type, samples, sample.options=as.character(seq_len(16)), sample.err="1:16")
+    versions <- list(base="1.4.0")
+    .getProcOrRaw("t-chimera", type, versions, samples, sample.options=as.character(seq_len(16)), sample.err="1:16")
 }

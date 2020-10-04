@@ -41,6 +41,7 @@
 #' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
 #' }
+#' #' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 #' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
@@ -68,6 +69,6 @@
 #' @importFrom methods as
 Tal1ChimeraData <- function(type=c("processed", "raw"), samples=NULL) {
     type <- match.arg(type)
-    host <- file.path("MouseGastrulationData", "tal1-chimera", "1.0.0")
-    .getProcOrRaw(host, type, samples, sample.options=as.character(seq_len(4)), sample.err="1:4")
+    versions <- list(base="1.0.0")
+    .getProcOrRaw("tal1-chimera", type, versions, samples, sample.options=as.character(seq_len(4)), sample.err="1:4")
 }

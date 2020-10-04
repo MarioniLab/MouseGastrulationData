@@ -4,7 +4,11 @@
 \alias{EmbryoAtlasData}
 \title{Mouse gastrulation timecourse data}
 \usage{
-EmbryoAtlasData(type = c("processed", "raw"), samples = NULL)
+EmbryoAtlasData(
+  type = c("processed", "raw"),
+  samples = NULL,
+  get.spliced = FALSE
+)
 }
 \arguments{
 \item{type}{String specifying the type of data to obtain, see Details.
@@ -12,6 +16,8 @@ Default behaviour is to return processed data.}
 
 \item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 If \code{NULL} (default), data are returned for all (36) samples.}
+
+\item{get.spliced}{Logical indicating whether to also download the spliced/unspliced/ambiguously spliced count matrices.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
@@ -53,6 +59,8 @@ The column metadata for called cells contains:
 \item{\code{umapX}:}{Numeric, x-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 }
+Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+If spliced counts were requested, these will be in the assays slot of the SingleCellExperiment object.
 
 The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
