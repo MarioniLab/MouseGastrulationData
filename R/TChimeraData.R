@@ -77,8 +77,8 @@
 #'
 #' @references
 #' Guibentif C, Griffiths JA et al. (2020). 
-#' Title. 
-#' \emph{Journal} 566, 7745:490-495.
+#' Diverse Routes towards Early Somites in the Mouse Embryo 
+#' \emph{Developmental Cell} In press.
 #'
 #' @export
 #' @importFrom ExperimentHub ExperimentHub

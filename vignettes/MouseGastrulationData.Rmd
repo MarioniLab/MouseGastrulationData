@@ -100,10 +100,11 @@ Size factors for normalisation are present in the object and are accessed with t
 head(sizeFactors(sce))
 ```
 
-After running `r Biocpkg("scater")`'s `normalize` function on the `r Biocpkg("SingleCellExperiment")` object, normalised or log-transformed counts can be accessed using `normcounts` and `logcounts`.
-These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg("scater")`.
+After running `r Biocpkg("scuttle")`'s `logNormCounts` function on the `r Biocpkg("SingleCellExperiment")` object, normalised or log-transformed counts can be accessed using `logcounts` (or, if `log=FALSE`, `normcounts`).
+These are not demonstrated in this vignette to avoid a dependency on `r Biocpkg("scuttle")`.
 
 The MGI symbol and Ensembl gene ID for each gene is stored in the `rowData` of the `SingleCellExperiment` object.
+All of this data was processed with Ensembl 92 annotation.
 
 ```{r}
 head(rowData(sce))
@@ -135,6 +136,14 @@ plot(
 )
 ```
 
+If you would like to use spliced/unspliced/ambiguously spliced count matrices for the atlas data, these can be accessed using the `get.spliced` argument, as shown below.
+Spliced count matrices will be stored as separate entries in the `assays` slot.
+
+```{r, message = FALSE}
+sce <- EmbryoAtlasData(samples=21, get.spliced=TRUE)
+names(assays(sce))
+```
+
 ## Raw data access
 
 Unfiltered count matrices are also available from `r Biocpkg("MouseGastrulationData")`.
@@ -154,7 +163,7 @@ Note that empty columns are excluded from these matrices.
 
 ## Background
 
-Data from experiments involving chimeric embryos in @pijuan-sala_single-cell_2019 are also available from this package.
+Data from experiments involving chimeric embryos in @pijuan-sala_single-cell_2019 and @guibentif2020diverse are also available from this package.
 In these embryos, a population of fluorescent embryonic stem cells were injected into wild-type E3.5 mouse embryos.
 The embryos were then returned to a parent mouse, and allowed to develop normally until collection.
 The cells were flow-sorted to purify host and injected populations, 
@@ -168,7 +177,7 @@ while cells with the knockout are also captured, and their aberrant behaviour ca
 
 ## Available datasets
 
-The package contains two chimeric datasets:
+The package contains three chimeric datasets:
 
 - Wild-type chimeras involving ten samples, from five independant embryo pools at two timepoints.
 The injected wild-type cells differ only in the insertion of the *td-Tomato* construct.
@@ -192,11 +201,17 @@ However, there are a few small differences:
 - They contain an extra feature for expression of the *td-Tomato*.
 - Cells derived from the injected cells (and thus are positive for *td-Tomato*) are marked in the `colData` field `tomato`.
 - Information for the proper pairing of samples from the same embryo pools can be found in the `colData` field `pool`.
+- Spliced count matrices are not provided.
 
 There may also be additional columns in the cell metadata for individual experiments, the meanings of which are described in the help pages for each function.
 Unfiltered count matrices are also provided for each sample in these datasets.
 
-# Working with the data outside of *Bioconductor*
+# Accessory data access
+
+Some additional data is provided that is specific to analyses performed in individual publications whose data is in this package.
+At the moment, the only example of this is `GuibentifExtraData()`, which downloads somitogenesis trajectory information and NMP orderings for @guibentif2020diverse.
+
+# Working with the data outside of *Bioconductor* and *R*
 
 A user might want to use these data outside of the *Bioconductor* framework in which it is provided from this package.
 Fortunately, there are several packages available for *R* that facilitate this.

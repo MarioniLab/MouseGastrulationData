@@ -61,6 +61,9 @@ The column metadata for called cells contains:
 }
 Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 If spliced counts were requested, these will be in the assays slot of the SingleCellExperiment object.
+Spliced count matrices were collated using \emph{velocyto} version 0.17.17.
+Spliced count matrices will not have had swapped molecules removed, as \emph{velocyto} and \code{DropletUtils::swappedDrops} are not compatible.
+However, these should still be effective for calculating RNA velocity estimates using various different tools.
 
 The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
