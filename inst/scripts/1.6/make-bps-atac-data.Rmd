@@ -1,0 +1,247 @@
+---
+title: Preparing the Pijuan-Sala ATAC-seq dataset for _ExperimentHub_
+author: Jonathan Griffiths
+date: 10 November 2020
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+```{r style, echo=FALSE, results='hide', message=FALSE}
+library(BiocStyle)
+knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Overview
+
+Here we will get the data for Pijuan-Sala et al.'s E8.25 ATAC-seq dataset.
+As I haven't been involved in this dataset, for information on their methods please see their paper
+
+# Preparing the processed data
+
+We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
+This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
+We access the data from the ArrayExpress submission
+
+```{r}
+library(BiocFileCache)
+bfc <- BiocFileCache("raw_data", ask=FALSE)
+bin.count.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/geo/",
+    "download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
+    "revision1%5FallPeaks%5FafterClusterPeak%2Emat%2Ebin%2Emtx%2Egz"))
+
+quant.count.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/",
+    "geo/download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
+    "revision1%5FallPeaks%5FafterClusterPeak%5Fraw%2Emtx%2Egz"))
+```
+
+We load in the count data (both binary and quantitative) from the MatrixMarket format, using methods from the `r CRANpkg("Matrix")` package:
+
+```{r}
+library(Matrix)
+quant_counts <- readMM(quant.count.path)
+bin_counts <- readMM(bin.count.path)
+```
+
+We can see that the binary counts are a simple operation of `x>0` on the quantitative counts.
+Therefore we will continue with the quantitative counts only - a user can binarise them if they so choose.
+
+```{r}
+ind <- which(bin_counts)
+ind2 <- which(quant_counts>0)
+all(ind == ind2)
+counts <- quant_counts
+rm(quant_counts, bin_counts)
+gc()
+```
+
+We also acquire and load in the row and column names for the sparse matrices above:
+
+```{r}
+peak.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/geo/",
+    "download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
+    "revision1%5FallPeaks%5FpassedQC%5FpeakNames%2Etxt%2Egz"))
+rownames(counts) <- read.table(peak.path)[,1]
+bc.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/geo/",
+    "download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
+    "revision1%5FallPeaks%5FpassedQC%5FbarcodeNames%2Exgi%2Etxt%2Egz"))
+colnames(counts)  <- read.table(bc.path)[,1]
+```
+There is more detailed row and column metadata in a supplementary file of the paper, which we now download and read into R.
+However, as this is provided as an Excel file, we need the `r CRANpkg("readxl")` package.
+
+```{r}
+library(readxl)
+supp.path <- bfcrpath(bfc, paste0("https://static-content.springer.com/",
+    "esm/art%3A10.1038%2Fs41556-020-0489-9/MediaObjects/",
+    "41556_2020_489_MOESM2_ESM.xlsx"))
+col.meta <- as.data.frame(read_excel(supp.path, sheet = 5, guess_max=19454))
+row.meta <- as.data.frame(read_excel(supp.path, sheet = 6, guess_max=373141))
+```
+
+You can see that the row metadata doesn't match up to the number of rows in the counts:
+
+```{r}
+nrow(counts) - nrow(row.meta)
+```
+
+Some rows of the rowData are duplicated where a region is close to more than one gene.
+
+```{r}
+first_duplicate <- row.meta$peakID[min(which(duplicated(row.meta$peakID)))]
+print(row.meta[row.meta$peakID == first_duplicate,c(1:7)])
+```
+
+We therefore collapse duplicated genes into a single row, with comma separation of terms.
+Separation by comma distinguishes from where the authors' have used semicolons.
+
+```{r}
+spt <- split(row.meta, f=row.meta$peakID)
+new <- lapply(spt, function(x){
+    if(nrow(x) == 1) return(x)
+    x[1, "geneName"] = paste(x$geneName, collapse = ",")
+    x[1, "geneID"] = paste(x$geneID, collapse = ",")
+    x[1, "strand"] = paste(x$strand, collapse = ",")
+    x[1, "distance_from_TSS"] = paste(x$distance_from_TSS, collapse = ",")
+    sub = x[, !grepl("(gene(Name|ID)|strand|distance_from_TSS)", colnames(x))]
+    if(nrow(unique(sub))>1) stop("Not fully corrected")
+    return(x[1,,drop=FALSE])
+})
+row.meta.nodups <- do.call(rbind, new)
+```
+
+We now reorder the count matrix to match the metadata
+
+```{r}
+counts.full <- counts
+counts <- counts[row.meta.nodups$peakID, col.meta$barcode]
+```
+
+The column metadata contains data best stored in other slots.
+We separate the UMAP coordinates and Topics into separate objects into their own reducedDim slots.
+
+```{r}
+umap <- col.meta[, c("umap_X", "umap_Y")]
+names(umap) <- c("x", "y")
+topics <- col.meta[, grepl("Topic", names(col.meta))]
+col.meta <- col.meta[, !grepl("(^Topic|^umap)", names(col.meta))]
+```
+
+We tweak some meta names for consistency with the other data in this package
+
+```{r}
+colnames(col.meta)[colnames(col.meta) == "ann"] <- "celltype"
+rownames(col.meta) <- col.meta$barcode
+```
+
+Now we make the SCE, including `rowRanges`.
+
+```{r}
+# library(GenomicRanges)
+#can use this in the getter-function to convert it to rowRanges
+# rr <- makeGRangesFromDataFrame(row.meta.nodups,
+#                          keep.extra.columns=TRUE,
+#                          ignore.strand=TRUE,
+#                          seqinfo=NULL,
+#                          seqnames.field="peak_chr",
+#                          start.field="peak_start",
+#                          end.field="peak_end",
+#                          starts.in.df.are.0based=TRUE)
+library(SingleCellExperiment)
+sce <- SingleCellExperiment(
+    assays = List(counts = counts),
+    colData = col.meta,
+    rowData = row.meta.nodups,
+    reducedDims = List(umap = umap, topics = topics)
+)
+sizeFactors(sce) <- rep(NA, ncol(sce)) #just as a dummy so the getter functions work more easily
+```
+
+We now save the data, splitting the large `SingleCellExperiment` object into its constituent parts.
+We then upload these smaller files to `r Biocpkg("ExperimentHub")`.
+Splitting up the data allows us to update the various getter functions if _SingleCellExperiment_ is updated or overhauled.
+
+```{r}
+base <- file.path("MouseGastrulationData", "BPS_atac", "1.6.0")
+dir.create(base, recursive=TRUE, showWarnings=FALSE)
+samp <- 1
+saveRDS(rowData(sce), file=paste0(base, "/rowdata.rds"))
+saveRDS(counts(sce), 
+    file=paste0(base, "/counts-processed-sample", samp, ".rds"))
+saveRDS(colData(sce), 
+    file=paste0(base, "/coldata-sample", samp, ".rds"))
+saveRDS(sizeFactors(sce), 
+    file=paste0(base, "/sizefac-sample", samp, ".rds"))
+saveRDS(reducedDims(sce), 
+    file=paste0(base, "/reduced-dims-sample", samp, ".rds"))
+saveRDS(counts.full,
+    file=file.path(base, sprintf("counts-raw-sample%i.rds", samp)))
+```
+
+# Make file metadata
+
+We now make the metadata for ExperimentHub so the files can be made properly available.
+
+```{r}
+info <- data.frame(
+    Title = sprintf("BPS_atac %s",
+        c(sprintf("processed counts (sample %i)", 1),
+            "rowData",
+            sprintf("colData (sample %i)", 1),
+            sprintf("size factors (sample %i)", 1),
+            sprintf("reduced dimensions (sample %i)", 1),
+            sprintf("raw counts (sample %i)", 1))
+    ),
+    Description = sprintf("%s for the E8.25 mouse embryo single-cell ATAC-seq dataset", 
+        c(sprintf("Processed counts for sample %i", 1),
+            "Per-gene metadata for all samples",
+            sprintf("Per-cell metadata for sample %i", 1),
+            sprintf("Size factors for sample %i", 1),
+            sprintf("Reduced dimensions for sample %i", 1),
+            sprintf("Raw (unfiltered) counts for sample %i", 1))
+    ),
+    RDataPath = c(
+        file.path("MouseGastrulationData", "BPS_atac", "1.6.0", 
+            c(sprintf("counts-processed-sample%i.rds", 1),
+                "rowdata.rds",
+                sprintf("coldata-sample%i.rds", 1),
+                sprintf("sizefac-sample%i.rds", 1),
+                sprintf("reduced-dims-sample%i.rds", 1),
+                sprintf("counts-raw-sample%i.rds", 1)))
+    ),
+    BiocVersion="3.16",
+    Genome="mm10",
+    SourceType="TXT",
+    SourceUrl=c(
+        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244",
+        rep("https://static-content.springer.com/", 2),
+        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244",
+        "https://static-content.springer.com/",
+        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244"
+    ),
+    SourceVersion=c(
+        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz",
+        rep("41556_2020_489_MOESM2_ESM.xlsx", 2),
+        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz",
+        "41556_2020_489_MOESM2_ESM.xlsx",
+        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz"
+    ),
+    Species="Mus musculus",
+    TaxonomyId="10090",
+    Coordinate_1_based=FALSE,
+    DataProvider="Jonathan Griffiths",
+    Maintainer="Jonathan Griffiths <jonathan.griffiths.94@gmail.com>",
+    RDataClass="character",
+    DispatchClass="Rds",
+    stringsAsFactors = FALSE
+)
+
+write.csv(file="../../extdata/metadata-bpsatac.csv", info, row.names=FALSE)
+
+```
+
+# Session information
+
+```{r}
+sessionInfo()
+```
