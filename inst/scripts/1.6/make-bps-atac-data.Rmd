@@ -209,7 +209,7 @@ info <- data.frame(
                 sprintf("reduced-dims-sample%i.rds", 1),
                 sprintf("counts-raw-sample%i.rds", 1)))
     ),
-    BiocVersion="3.16",
+    BiocVersion="3.13",
     Genome="mm10",
     SourceType="TXT",
     SourceUrl=c(
