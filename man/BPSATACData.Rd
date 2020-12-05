@@ -71,9 +71,9 @@ It contains:
 }
 }
 \examples{
-atac.data <- BPSATACData(samples = 1)
+atac.data <- BPSATACData()
 
-atac.data <- BPSATACData(type="processed", samples = 1)
+atac.data <- BPSATACData(type="processed")
 
 }
 \references{
