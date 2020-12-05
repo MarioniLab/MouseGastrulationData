@@ -19,9 +19,11 @@ knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 # Introduction
 
 The `r Biocpkg("MouseGastrulationData")` package provides convenient access to the single-cell RNA sequencing (scRNA-seq) datasets from @pijuan-sala_single-cell_2019, and additional data generated in similar systems.
-This study focuses on mouse gastrulation and organogenesis, providing transcriptomic profiles at single-cell resolution across several stages of early development.
+This primary study focuses on mouse gastrulation and organogenesis, providing transcriptomic profiles at single-cell resolution across several stages of early development.
 Datasets are provided as count matrices with additional feature- and sample-level metadata after processing.
 Raw sequencing data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
+
+In addition, the package also contains perturbation data in the form of chimaeric embryos, single-nucleus ATAC-seq data from E8.25 embryos, and will soon contain seqFISH data from E8.5 embryos.
 
 # Installation
 
@@ -44,7 +46,7 @@ To use the package, load it in the typical way.
 library(MouseGastrulationData)
 ```
 
-# Processing overview
+# Processing overview of the scRNA-seq atlas
 
 Detailed methods are available in the methods that accompany [the paper](https://doi.org/10.1038/s41586-019-0933-9),
 or from the code in the corresponding [Github repository](https://github.com/MarioniLab/EmbryoTimecourse2018/).
@@ -206,7 +208,14 @@ However, there are a few small differences:
 There may also be additional columns in the cell metadata for individual experiments, the meanings of which are described in the help pages for each function.
 Unfiltered count matrices are also provided for each sample in these datasets.
 
-# Accessory data access
+# snATAC-seq data information
+
+Data from @BPS_atac is available in this package in the `BPSATACData` function.
+As the package authors were not involved in this study, we leave it to users to familiarise themselves with the methods used in that paper, [linked here](https://pubmed.ncbi.nlm.nih.gov/32231307/).
+Because this data is measured in units of open chromatin, its format is quite different to the other datasets, so it is advised to consult the manual page for the function for more information.
+Raw sequencing data is available at GEO accession [GSE133244](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244).
+
+# Accessory data information
 
 Some additional data is provided that is specific to analyses performed in individual publications whose data is in this package.
 At the moment, the only example of this is `GuibentifExtraData()`, which downloads somitogenesis trajectory information and NMP orderings for @guibentif2020diverse.
