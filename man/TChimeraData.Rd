@@ -69,7 +69,7 @@ The column metadata for called cells contains:
 \item{\code{somite.subct.mapped}:}{Character, somite subcluster to which cells mapped.}
 \item{\code{sizeFactor}:}{Numeric, cell sizefactor.}
 }
-#' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 
 The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.

@@ -42,10 +42,10 @@
 #' \item{\code{stripped}:}{Logical, whether a cell was called as a cytoplasm-stripped nucleus.}
 #' \item{\code{celltype}:}{Character, cell type to which the cell was assigned.}
 #' \item{\code{colour}:}{Integer, cell type colour (hex) as in Pijuan-Sala et al. (2019).}
-#' \item{\code{umapX}:}{Numeric, x-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
-#' \item{\code{umapY}:}{Numeric, y-coordinate of UMAP plot in Pijuan-Sala et al. (2019).}
 #' }
 #' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+#' These are \code{pca.corrected} and \code{umap}.
+#' 
 #' If spliced counts were requested, these will be in the assays slot of the SingleCellExperiment object.
 #' Spliced count matrices were collated using \emph{velocyto} version 0.17.17.
 #' Spliced count matrices will not have had swapped molecules removed, as \emph{velocyto} and \code{DropletUtils::swappedDrops} are not compatible.

@@ -50,7 +50,7 @@
 #' \item{\code{closest.cell}:}{Character, closest cell in the atlas dataset (see \code{\link{EmbryoAtlasData}}) after MNN mapping.}
 #' \item{\code{doub.density}:}{Numeric, output of (a now-outdated run of) \code{scran::doubletCells}, performed on each sample separately.}
 #' }
-#' #' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+#' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 #' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.

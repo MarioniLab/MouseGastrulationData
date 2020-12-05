@@ -41,7 +41,7 @@
 #' \item{\code{stage.mapped}:}{Character, stage of the mouse embryo atlas to which the cell was mapped.}
 #' \item{\code{celltype.mapped}:}{Character, cell type of the mouse embryo atlas to which the cell was mapped.}
 #' }
-#' #' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+#' Reduced dimension representations of the data are also available in the \code{reducedDims} slot of the SingleCellExperiment object.
 #' 
 #' The raw data contains the unfiltered count matrix for each sample, as generated directly from the CellRanger software.
 #' Swapped molecules have been removed using \code{DropletUtils::swappedDrops}.
