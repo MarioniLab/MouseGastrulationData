@@ -127,26 +127,23 @@ topics <- col.meta[, grepl("Topic", names(col.meta))]
 col.meta <- col.meta[, !grepl("(^Topic|^umap)", names(col.meta))]
 ```
 
-We tweak some meta names for consistency with the other data in this package
+We tweak some meta names for consistency with the other data in this package, and add stage and sample IDs for more consistency.
+We also add row/colnames to the count matrix.
 
 ```{r}
 colnames(col.meta)[colnames(col.meta) == "ann"] <- "celltype"
-rownames(col.meta) <- col.meta$barcode
+rownames(col.meta) <- colnames(counts) <- col.meta$barcode
+rownames(row.meta.nodups) <- rownames(counts) <- row.meta.nodups$peakID
+col.meta = cbind(
+    data.frame(sample = rep(1, nrow(col.meta)),
+               stage = rep("E8.25", nrow(col.meta))),
+    col.meta
+)
 ```
 
 Now we make the SCE, including `rowRanges`.
 
 ```{r}
-# library(GenomicRanges)
-#can use this in the getter-function to convert it to rowRanges
-# rr <- makeGRangesFromDataFrame(row.meta.nodups,
-#                          keep.extra.columns=TRUE,
-#                          ignore.strand=TRUE,
-#                          seqinfo=NULL,
-#                          seqnames.field="peak_chr",
-#                          start.field="peak_start",
-#                          end.field="peak_end",
-#                          starts.in.df.are.0based=TRUE)
 library(SingleCellExperiment)
 sce <- SingleCellExperiment(
     assays = List(counts = counts),
@@ -154,7 +151,7 @@ sce <- SingleCellExperiment(
     rowData = row.meta.nodups,
     reducedDims = List(umap = umap, topics = topics)
 )
-sizeFactors(sce) <- rep(NA, ncol(sce)) #just as a dummy so the getter functions work more easily
+sizeFactors(sce) <- NULL #just to make this explicit
 ```
 
 We now save the data, splitting the large `SingleCellExperiment` object into its constituent parts.
