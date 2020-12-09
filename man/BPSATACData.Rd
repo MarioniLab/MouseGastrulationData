@@ -54,7 +54,7 @@ It contains:
 \item{\code{peak_chr}:}{Character, chromosome ID for each peak.}
 \item{\code{peak_start}:}{Integer, start position for each peak. As this is from a bed file (I think), this is 0-indexed, and the peak is inclusive of this position.}
 \item{\code{peak_end}:}{Integer, end position for each peak. As this is from a bed file (I think), this is 0-indexed, and the peak is exclusive of this position.}
-\item{\code{Annotation.General}:}{Character, general peak annotation (TSS (−1kb to +100 bp), TTS (−100 bp to +1 kb), intron, exon, intergenic).}
+\item{\code{Annotation.General}:}{Character, general peak annotation (TSS (-1kb to +100bp), TTS (-100bp to +1kb), intron, exon, intergenic).}
 \item{\code{distance_from_TSS}:}{Integer, distance from the TSS that peaks been annotated to if the region is intergenic. Note: the authors have annotated peaks to multiple genes; distances for different genes are comma-separated in this column.}
 \item{\code{geneName}:}{Character, gene name (MGI). Note: the authors have annotated peaks to multiple genes; names for different genes are comma-separated in this column.}
 \item{\code{geneID}:}{Character, gene ID (Ensembl gene ID, v92). Note: the authors have annotated peaks to multiple genes; IDs for different genes are comma-separated in this column.}
@@ -63,7 +63,7 @@ It contains:
 \item{\code{topic}:}{Character, topic membership of the peak. For multiple topics, authors have semicolon-separated topic names.}
 \item{\code{topic_stringent}:}{Character, topic membership of the peak if it contributes to only a single topic; else "Nonspecific".}
 \item{\code{accessibility}:}{Integer, number of nuclei with where peak is accessible.}
-\item{\code{accessibility_log}:}{Numeric, log-transformed number of nuclei with where peak is accessible (base e, with +1).}
+\item{\code{accessibility_log}:}{Numeric, log-transformed number of nuclei with where peak is accessible (base e, with an added 1 to the count).}
 \item{\code{accessibility_ratio}:}{Numeric, fraction of nuclei where peak is accessible.}
 \item{\code{umap_X}:}{Numeric, umap x-coordinate of peak.}
 \item{\code{umap_Y}:}{Numeric, umap y-coordinate of peak.}
