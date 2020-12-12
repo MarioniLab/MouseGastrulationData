@@ -64,10 +64,12 @@
 #' 
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
+#' \dontrun{
+#' # dataset large enough to cause bioc build issues 
 #' atac.data <- BPSATACData()
-#'
 #' atac.data <- BPSATACData(type="processed")
-#'
+#' }
+#' 
 #' @references
 #' Pijuan-Sala B et al. (2020). 
 #' Single-cell chromatin accessibility maps reveal regulatory programs driving early mouse organogenesis.

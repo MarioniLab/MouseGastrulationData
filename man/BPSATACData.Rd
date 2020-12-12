@@ -71,9 +71,11 @@ It contains:
 }
 }
 \examples{
+\dontrun{
+# dataset large enough to cause bioc build issues 
 atac.data <- BPSATACData()
-
 atac.data <- BPSATACData(type="processed")
+}
 
 }
 \references{
