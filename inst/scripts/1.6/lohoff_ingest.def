@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: bioconductor/bioconductor_docker:devel
+
+%help
+    Image for ingesting Tim's data
+
+%post
+    apt-get update && apt-get -y upgrade
+    Rscript -e "BiocManager::install(c(
+        'MouseGastrulationData',
+        'ExperimentHub',
+        'tidyverse',
+        'rhdf5',
+        'BiocStyle',
+        'uwot',
+        'BumpyMatrix',
+        'rmarkdown',
+        'SpatialExperiment'
+    ))"

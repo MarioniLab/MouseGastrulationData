@@ -21,7 +21,7 @@ As I haven't been involved in this dataset, for information on their methods ple
 
 We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
 This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
-We access the data from the ArrayExpress submission
+We download the data from the provided server:
 
 ```{r}
 library(BiocFileCache)
@@ -31,128 +31,152 @@ bfc <- BiocFileCache("raw_data", ask=FALSE)
 readme.path <- bfcrpath(bfc, file.path(url, "README.md"))
 rme <- read.table(readme.path, sep = "[")[,1]
 rme <- rme[substr(rme, 1, 1) == "-"]
-files <- gsub("- ", "", regmatches(rme, regexpr("- [A-Za-z0-9\\.]+", rme)))
+files <- gsub("- ", "", regmatches(rme, regexpr("- [A-Za-z0-9\\._]+", rme)))
 
-paths <- sapply(files, function(x) bfcrpath(bfc, file.path(url, files)))
+paths <- lapply(files, function(x) bfcrpath(bfc, file.path(url, x)))
+names(paths) <- files
 ```
 
-We load in the count data (both binary and quantitative) from the MatrixMarket format, using methods from the `r CRANpkg("Matrix")` package:
+## seqFISH counts
+
+We load in the count data from the `.rds` files:
 
 ```{r}
 library(Matrix)
-quant_counts <- readMM(quant.count.path)
-bin_counts <- readMM(bin.count.path)
+counts <- readRDS(paths[["counts.Rds"]])
+norm <- readRDS(paths[["exprs.Rds"]]) #should be from the area
 ```
 
-We can see that the binary counts are a simple operation of `x>0` on the quantitative counts.
-Therefore we will continue with the quantitative counts only - a user can binarise them if they so choose.
+One gene changed name between Ensembl 92 (the atlas) and now.
+We change it back, for consistency.
 
 ```{r}
-ind <- which(bin_counts)
-ind2 <- which(quant_counts>0)
-all(ind == ind2)
-counts <- quant_counts
-rm(quant_counts, bin_counts)
-gc()
+rownames(counts)[which(rownames(counts) == "Cavin3")] = "Prkcdbp"
+rownames(norm)[which(rownames(norm) == "Cavin3")] = "Prkcdbp"
 ```
 
-We also acquire and load in the row and column names for the sparse matrices above:
+We also can take the cell metadata and tweak some entries for consistency with our other data types.
+We separate a data frame of cell positions from it, as well.
 
 ```{r}
-peak.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/geo/",
-    "download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
-    "revision1%5FallPeaks%5FpassedQC%5FpeakNames%2Etxt%2Egz"))
-rownames(counts) <- read.table(peak.path)[,1]
-bc.path <- bfcrpath(bfc, paste0("https://www.ncbi.nlm.nih.gov/geo/",
-    "download/?acc=GSE133244&format=file&file=GSE133244%5Fembryo%5F",
-    "revision1%5FallPeaks%5FpassedQC%5FbarcodeNames%2Exgi%2Etxt%2Egz"))
-colnames(counts)  <- read.table(bc.path)[,1]
-```
-There is more detailed row and column metadata in a supplementary file of the paper, which we now download and read into R.
-However, as this is provided as an Excel file, we need the `r CRANpkg("readxl")` package.
+meta <- readRDS(paths[["metadata.Rds"]])
+#extract umap
+umap <- meta[,paste0("UMAP", 1:2)]
+meta <- meta[,!grepl("UMAP", colnames(meta))]
 
-```{r}
-library(readxl)
-supp.path <- bfcrpath(bfc, paste0("https://static-content.springer.com/",
-    "esm/art%3A10.1038%2Fs41556-020-0489-9/MediaObjects/",
-    "41556_2020_489_MOESM2_ESM.xlsx"))
-col.meta <- as.data.frame(read_excel(supp.path, sheet = 5, guess_max=19454))
-row.meta <- as.data.frame(read_excel(supp.path, sheet = 6, guess_max=373141))
-```
+names(meta)[names(meta) == "uniqueID"] <- "cell"
+names(meta)[names(meta) == "celltype_mapped_refined"] <- "celltype"
+names(meta)[names(meta) == "Area"] <- "area"
+meta$sample <- gsub("embryo", "", meta$embryo)
 
-You can see that the row metadata doesn't match up to the number of rows in the counts:
+cell_pos <- meta[,c(
+    which(grepl("^[xy]_global_affine", names(meta))),
+    which(names(meta) == "z"))]
+names(cell_pos) <- c("x", "y")
+meta <- meta[,!grepl("(^[xy]_global_affine|^z)", names(meta))]
 
-```{r}
-nrow(counts) - nrow(row.meta)
+#Not strings as factors by default
+for(i in seq_len(ncol(meta))){
+    if(class(meta[,i]) == "factor")
+        meta[,i] = as.character(meta[,i])
+}
 ```
 
-Some rows of the rowData are duplicated where a region is close to more than one gene.
+Something something size factors
 
 ```{r}
-first_duplicate <- row.meta$peakID[min(which(duplicated(row.meta$peakID)))]
-print(row.meta[row.meta$peakID == first_duplicate,c(1:7)])
+sfs <- colSums(counts) - counts["Xist",]
+sfs <- sfs/mean(sfs)
+my_norm = Matrix(log2(sweep(counts, 2, sfs, "/")+1), sparse = TRUE)
+table(my_norm[my_norm > 0] == norm[my_norm > 0])
+
+mismatches = which(my_norm[my_norm > 0] != norm[my_norm > 0])
+table(row(counts)[mismatches])
+
+reNormalise = function(sce_filt) {
+  assay(sce_filt, "logcounts") <- logcounts(scater::logNormCounts(
+    sce_filt, size_factors = sce_filt$total - counts(sce_filt)["Xist",]))
+  return(sce_filt)
+}
+#area
+sfs <- meta$Area/mean(meta$Area)
+lc.area <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
+table(lc.area[lc.area > 0] == norm[lc.area > 0])
+
+#counts not Xist
+cs <- colSums(counts[rownames(counts) != "Xist",])
+sfs <- (1/cs)/mean(1/cs)
+lc.counts <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
+table(lc.counts[lc.counts > 0] == norm[lc.counts > 0])
+
+
+sfs = edgeR::calcNormFactors(counts)
+edgeR.counts <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
+table(edgeR.counts[edgeR.counts > 0] == norm[edgeR.counts > 0])
 ```
 
-We therefore collapse duplicated genes into a single row, with comma separation of terms.
-Separation by comma distinguishes from where the authors' have used semicolons.
+We need to make our own rowData here.
+We will do so from the existing MGD rowData from the atlas.
+We also switch the rownames to Ensembl IDs for consistency with other data in the package.
 
 ```{r}
-spt <- split(row.meta, f=row.meta$peakID)
-new <- lapply(spt, function(x){
-    if(nrow(x) == 1) return(x)
-    x[1, "geneName"] = paste(x$geneName, collapse = ",")
-    x[1, "geneID"] = paste(x$geneID, collapse = ",")
-    x[1, "strand"] = paste(x$strand, collapse = ",")
-    x[1, "distance_from_TSS"] = paste(x$distance_from_TSS, collapse = ",")
-    sub = x[, !grepl("(gene(Name|ID)|strand|distance_from_TSS)", colnames(x))]
-    if(nrow(unique(sub))>1) stop("Not fully corrected")
-    return(x[1,,drop=FALSE])
-})
-row.meta.nodups <- do.call(rbind, new)
+library(MouseGastrulationData)
+temp <- EmbryoAtlasData(samples=1)
+atlas_rd <- rowData(temp)
+rd <- atlas_rd[match(rownames(counts), atlas_rd$SYMBOL),]
+rownames(rd) <- rownames(counts) <- rd$ENSEMBL
 ```
 
-We now reorder the count matrix to match the metadata
+mRNA spots and segmentation paths are a special kind of data for seqFISH experiments.
+We can incorporate these into the SCE using `BumpyMatrix` files.
 
 ```{r}
-counts.full <- counts
-counts <- counts[row.meta.nodups$peakID, col.meta$barcode]
-```
+library(BumpyMatrix)
+spots <- readRDS(paths[["mRNA.Rds"]])
+spots$geneID <- as.character(spots$geneID)
+spots$geneID[spots$geneID == "Cavin3"] <- "Prkcdbp"
+names(spots)[3:4] <- c("x", "y")
+spots$ENSEMBL <- rd$ENSEMBL[match(spots$geneID, rd$SYMBOL)]
 
-The column metadata contains data best stored in other slots.
-We separate the UMAP coordinates and Topics into separate objects into their own reducedDim slots.
-
-```{r}
-umap <- col.meta[, c("umap_X", "umap_Y")]
-names(umap) <- c("x", "y")
-topics <- col.meta[, grepl("Topic", names(col.meta))]
-col.meta <- col.meta[, !grepl("(^Topic|^umap)", names(col.meta))]
-```
-
-We tweak some meta names for consistency with the other data in this package, and add stage and sample IDs for more consistency.
-We also add row/colnames to the count matrix.
-
-```{r}
-colnames(col.meta)[colnames(col.meta) == "ann"] <- "celltype"
-rownames(col.meta) <- colnames(counts) <- col.meta$barcode
-rownames(row.meta.nodups) <- rownames(counts) <- row.meta.nodups$peakID
-col.meta = cbind(
-    data.frame(sample = rep(1, nrow(col.meta)),
-               stage = rep("E8.25", nrow(col.meta))),
-    col.meta
+spots_bm <- splitAsBumpyMatrix(
+    x=spots[, !names(spots)%in%c("ENSEMBL", "uniqueID", "geneID")],
+    row=spots$ENSEMBL,
+    col=spots$uniqueID,
+    sparse=TRUE #there are many 0-counts
 )
+#order correctly and remove QC fail cells
+spots_bm <- spots_bm[rownames(counts), colnames(counts)]
 ```
 
-Now we make the SCE, including `rowRanges`.
+We also rearrange the segmentation coordinates into a DataFrameList
 
 ```{r}
-library(SingleCellExperiment)
-sce <- SingleCellExperiment(
-    assays = List(counts = counts),
-    colData = col.meta,
-    rowData = row.meta.nodups,
-    reducedDims = List(umap = umap, topics = topics)
+library(IRanges)
+dfl = DataFrameList(lapply(seq_len(nrow(meta)), function(x) 
+    data.frame(
+        x = meta$segmentation_vertices_x_global_affine[x][[1]],
+        y = meta$segmentation_vertices_y_global_affine[x][[1]]
+    )))
+meta <- meta[,!grepl("segmentation_vertices_[xy]_global_affine", names(meta))]
+meta <- DataFrame(meta)
+meta$segmentation_vertices = dfl
+```
+
+Now we make the observed count SCE.
+
+```{r}
+library(SpatialExperiment)
+sce <- SpatialExperiment(
+    assays = List(
+        counts = counts,
+        spots = spots_bm
+    ),
+    colData = meta,
+    rowData = rd,
+    reducedDims = List(umap = umap),
+    spatialCoords = cell_pos
 )
-sizeFactors(sce) <- NULL #just to make this explicit
+sizeFactors(sce) <- sfs
 ```
 
 We now save the data, splitting the large `SingleCellExperiment` object into its constituent parts.
@@ -160,20 +184,93 @@ We then upload these smaller files to `r Biocpkg("ExperimentHub")`.
 Splitting up the data allows us to update the various getter functions if _SingleCellExperiment_ is updated or overhauled.
 
 ```{r}
-base <- file.path("MouseGastrulationData", "BPS_atac", "1.6.0")
+base <- file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0")
 dir.create(base, recursive=TRUE, showWarnings=FALSE)
-samp <- 1
 saveRDS(rowData(sce), file=paste0(base, "/rowdata.rds"))
-saveRDS(counts(sce), 
-    file=paste0(base, "/counts-processed-sample", samp, ".rds"))
-saveRDS(colData(sce), 
-    file=paste0(base, "/coldata-sample", samp, ".rds"))
-saveRDS(sizeFactors(sce), 
-    file=paste0(base, "/sizefac-sample", samp, ".rds"))
-saveRDS(reducedDims(sce), 
-    file=paste0(base, "/reduced-dims-sample", samp, ".rds"))
-saveRDS(counts.full,
-    file=file.path(base, sprintf("counts-raw-sample%i.rds", samp)))
+for(samp in unique(sce$sample)){
+    sub = sce[, sce$sample == samp]
+    saveRDS(counts(sub), 
+        file=paste0(base, "/counts-processed-sample", samp, ".rds"))
+    saveRDS(assays(sub, "spots"), 
+        file=paste0(base, "/spots-processed-sample", samp, ".rds"))
+    saveRDS(colData(sub), 
+        file=paste0(base, "/coldata-sample", samp, ".rds"))
+    saveRDS(sizeFactors(sub), 
+        file=paste0(base, "/sizefac-sample", samp, ".rds"))
+    saveRDS(reducedDims(sub), 
+        file=paste0(base, "/reduced-dims-sample", samp, ".rds"))
+    saveRDS(spatialCoords(sub), 
+        file=paste0(base, "/spatial-coords-sample", samp, ".rds"))
+}
+```
+
+## Imputed counts
+
+The imputed counts are transcriptome wide, but are fairly dense compared to true scRNA-seq data.
+We load and organise this data for saving.
+
+```{r}
+library(rhdf5)
+imp <- h5read(paths[["imputed.h5"]], "logcounts")
+imp <- Matrix(imp, sparse=TRUE) #reduces memory size somewhat
+colnames(imp) <- readRDS(paths[["imputed_column_names.Rds"]])
+rn_imp <- readRDS(paths[["imputed_row_names.Rds"]])
+```
+
+Note that there are some genes where the symbol is duplicated, with one example shown below.
+
+```{r}
+rn_imp[grepl("Nudt8", rn_imp)]
+```
+
+We can show that, if we remove the suffixes, we perfectly recapitulate the atlas gene symbols.
+
+```{r}
+rd_imp <- data.frame(
+    ENSEMBL=atlas_rd$ENSEMBL[match(rn_imp, atlas_rd$SYMBOL)],
+    SYMBOL=rn_imp)
+ens <- atlas_rd$ENSEMBL[match(rn_imp, atlas_rd$SYMBOL)]
+mismatch <- which(is.na(ens))
+table(gsub("\\.[12]$", "", rn_imp[mismatch]) == atlas_rd$SYMBOL[mismatch])
+```
+
+Moreover, if we ignore the `r length(mismatch)` mismatching genes, we can see that every other one matches the atlas rowData.
+
+```{r}
+match <- which(!is.na(ens))
+table(rn_imp[match] == atlas_rd$SYMBOL[match])
+```
+
+In addition, pers. comm.s confirmed that the genes are ordered the same.
+Altogether, we take the atlas rowData forward for this dataset.
+
+```{r}
+rownames(imp) = atlas_rd$ENSEMBL
+sce_imp <- SpatialExperiment(
+    assays = List(
+        logcounts_imputed = imp[,meta$cell]
+    ),
+    colData = meta,
+    rowData = atlas_rd,
+    spatialCoords = cell_pos
+)
+```
+
+Now we can save this, split by sample
+
+```{r}
+base <- file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv_imputed", "1.6.0")
+dir.create(base, recursive=TRUE, showWarnings=FALSE)
+saveRDS(rowData(sce_imp), file=paste0(base, "/rowdata.rds"))
+for(samp in unique(sce_imp$sample)){
+    sub = sce_imp[, sce_imp$sample == samp]
+    saveRDS(logcounts(sub), 
+        file=paste0(base, "/logcounts-processed-sample", samp, ".rds"))
+    saveRDS(colData(sub), 
+        file=paste0(base, "/coldata-sample", samp, ".rds"))
+    saveRDS(spatialCoords(sub), 
+        file=paste0(base, "/spatial-coords-sample", samp, ".rds"))
+}
 ```
 
 # Make file metadata
