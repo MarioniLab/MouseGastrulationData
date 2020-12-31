@@ -44,7 +44,7 @@ We load in the count data from the `.rds` files:
 ```{r}
 library(Matrix)
 counts <- readRDS(paths[["counts.Rds"]])
-norm <- readRDS(paths[["exprs.Rds"]]) #should be from the area
+norm <- readRDS(paths[["exprs.Rds"]])
 ```
 
 One gene changed name between Ensembl 92 (the atlas) and now.
@@ -67,12 +67,12 @@ meta <- meta[,!grepl("UMAP", colnames(meta))]
 names(meta)[names(meta) == "uniqueID"] <- "cell"
 names(meta)[names(meta) == "celltype_mapped_refined"] <- "celltype"
 names(meta)[names(meta) == "Area"] <- "area"
-meta$sample <- gsub("embryo", "", meta$embryo)
+meta$sample <- as.numeric(gsub("embryo", "", meta$embryo))
 
 cell_pos <- meta[,c(
     which(grepl("^[xy]_global_affine", names(meta))),
     which(names(meta) == "z"))]
-names(cell_pos) <- c("x", "y")
+names(cell_pos) <- c("x", "y", "z")
 meta <- meta[,!grepl("(^[xy]_global_affine|^z)", names(meta))]
 
 #Not strings as factors by default
@@ -81,6 +81,7 @@ for(i in seq_len(ncol(meta))){
         meta[,i] = as.character(meta[,i])
 }
 ```
+
 
 Something something size factors
 
@@ -148,7 +149,7 @@ spots_bm <- splitAsBumpyMatrix(
 spots_bm <- spots_bm[rownames(counts), colnames(counts)]
 ```
 
-We also rearrange the segmentation coordinates into a DataFrameList
+We also rearrange the segmentation coordinates into a DataFrameList and return them to the column metadata.
 
 ```{r}
 library(IRanges)
@@ -173,15 +174,15 @@ sce <- SpatialExperiment(
     ),
     colData = meta,
     rowData = rd,
-    reducedDims = List(umap = umap),
-    spatialCoords = cell_pos
+    reducedDims = list(umap = umap),
+    spatialCoords = DataFrame(cell_pos)
 )
 sizeFactors(sce) <- sfs
 ```
 
 We now save the data, splitting the large `SingleCellExperiment` object into its constituent parts.
 We then upload these smaller files to `r Biocpkg("ExperimentHub")`.
-Splitting up the data allows us to update the various getter functions if _SingleCellExperiment_ is updated or overhauled.
+Splitting up the data allows us to update the various getter functions if _SpatialExperiment_ is updated or overhauled without having to change the data on the server.
 
 ```{r}
 base <- file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0")
@@ -278,48 +279,47 @@ for(samp in unique(sce_imp$sample)){
 We now make the metadata for ExperimentHub so the files can be made properly available.
 
 ```{r}
-info <- data.frame(
-    Title = sprintf("BPS_atac %s",
-        c(sprintf("processed counts (sample %i)", 1),
+info1 <- data.frame(
+    Title = sprintf("Lohoff biorXiv %s",
+        c(sprintf("processed counts (sample %i)", unique(sce$sample)),
             "rowData",
-            sprintf("colData (sample %i)", 1),
-            sprintf("size factors (sample %i)", 1),
-            sprintf("reduced dimensions (sample %i)", 1),
-            sprintf("raw counts (sample %i)", 1))
+            sprintf("colData (sample %i)", unique(sce$sample)),
+            sprintf("size factors (sample %i)", unique(sce$sample)),
+            sprintf("reduced dimensions (sample %i)", unique(sce$sample)),
+            sprintf("spatial coordinates (sample %i)", unique(sce$sample)),
+            sprintf("spots (sample %i)", unique(sce$sample)))
     ),
-    Description = sprintf("%s for the E8.25 mouse embryo single-cell ATAC-seq dataset", 
-        c(sprintf("Processed counts for sample %i", 1),
+    Description = sprintf("%s for the E8.5 seqFISH dataset from biorXiv", 
+        c(sprintf("Processed counts for sample %i", unique(sce$sample)),
             "Per-gene metadata for all samples",
-            sprintf("Per-cell metadata for sample %i", 1),
-            sprintf("Size factors for sample %i", 1),
-            sprintf("Reduced dimensions for sample %i", 1),
-            sprintf("Raw (unfiltered) counts for sample %i", 1))
+            sprintf("Per-cell metadata for sample %i", unique(sce$sample)),
+            sprintf("Size factors for sample %i", unique(sce$sample)),
+            sprintf("Reduced dimensions for sample %i", unique(sce$sample)),
+            sprintf("Cell spatial coordinates for sample %i", unique(sce$sample)),
+            sprintf("RNA spot coordinates for sample %i", unique(sce$sample)))
     ),
     RDataPath = c(
-        file.path("MouseGastrulationData", "BPS_atac", "1.6.0", 
-            c(sprintf("counts-processed-sample%i.rds", 1),
+        file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0", 
+            c(sprintf("counts-processed-sample%i.rds", unique(sce$sample)),
                 "rowdata.rds",
-                sprintf("coldata-sample%i.rds", 1),
-                sprintf("sizefac-sample%i.rds", 1),
-                sprintf("reduced-dims-sample%i.rds", 1),
-                sprintf("counts-raw-sample%i.rds", 1)))
+                sprintf("coldata-sample%i.rds", unique(sce$sample)),
+                sprintf("sizefac-sample%i.rds", unique(sce$sample)),
+                sprintf("reduced-dims-sample%i.rds", unique(sce$sample)),
+                sprintf("spots-processed-sample%i.rds", unique(sce$sample)),
+                sprintf("spatial-coords-sample%i.rds", unique(sce$sample))))
     ),
     BiocVersion="3.13",
     Genome="mm10",
-    SourceType="TXT",
-    SourceUrl=c(
-        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244",
-        rep("https://static-content.springer.com/", 2),
-        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244",
-        "https://static-content.springer.com/",
-        "https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244"
-    ),
+    SourceType="RDS",
+    SourceUrl="https://content.cruk.cam.ac.uk/jmlab/SpatialMouseAtlas2020/",
     SourceVersion=c(
-        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz",
-        rep("41556_2020_489_MOESM2_ESM.xlsx", 2),
-        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz",
-        "41556_2020_489_MOESM2_ESM.xlsx",
-        "GSE133244_embryo_revision1_allPeaks_afterClusterPeak_raw.mtx.gz"
+        rep("counts.Rds", length(unique(sce$sample))),
+        "counts.Rds",
+        rep("metadata.Rds", length(unique(sce$sample))),
+        rep("sizeFactors.Rds", length(unique(sce$sample))),
+        rep("metadata.Rds", length(unique(sce$sample))),
+        rep("mRNA.Rds", length(unique(sce$sample))),
+        rep("metadata.Rds", length(unique(sce$sample)))
     ),
     Species="Mus musculus",
     TaxonomyId="10090",
@@ -331,7 +331,52 @@ info <- data.frame(
     stringsAsFactors = FALSE
 )
 
-write.csv(file="../../extdata/metadata-bpsatac.csv", info, row.names=FALSE)
+info2 <- data.frame(
+    Title = sprintf("Lohoff biorXiv imputed %s",
+        c(sprintf("processed logcounts (sample %i)", unique(sce_imp$sample)),
+            "rowData",
+            sprintf("colData (sample %i)", unique(sce_imp$sample)),
+            sprintf("spatial coordinates (sample %i)", unique(sce_imp$sample)))
+    ),
+    Description = sprintf("%s for the E8.5 imputed seqFISH dataset from biorXiv", 
+        c(sprintf("Processed logcounts for sample %i", unique(sce_imp$sample)),
+            "Per-gene metadata for all samples",
+            sprintf("Per-cell metadata for sample %i", unique(sce_imp$sample)),
+            sprintf("Cell spatial coordinates for sample %i", unique(sce_imp$sample)))
+    ),
+    RDataPath = c(
+        file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv_imputed", "1.6.0", 
+            c(sprintf("logcounts-processed-sample%i.rds", unique(sce_imp$sample)),
+                "rowdata.rds",
+                sprintf("coldata-sample%i.rds", unique(sce_imp$sample)),
+                sprintf("spatial-coords-sample%i.rds", unique(sce_imp$sample))))
+    ),
+    BiocVersion="3.13",
+    Genome="mm10",
+    SourceType=c(
+        rep("HDF5", length(unique(sce_imp$sample))),
+        rep("RDS", length(unique(sce_imp$sample)) * 2 + 1)),
+    SourceUrl="https://content.cruk.cam.ac.uk/jmlab/SpatialMouseAtlas2020/",
+    SourceVersion=c(
+        rep("imputed.h5", length(unique(sce_imp$sample))),
+        "imputed_row_names.Rds",
+        rep("metadata.Rds", length(unique(sce_imp$sample))),
+        rep("metadata.Rds", length(unique(sce_imp$sample)))
+    ),
+    Species="Mus musculus",
+    TaxonomyId="10090",
+    Coordinate_1_based=FALSE,
+    DataProvider="Jonathan Griffiths",
+    Maintainer="Jonathan Griffiths <jonathan.griffiths.94@gmail.com>",
+    RDataClass="character",
+    DispatchClass="Rds",
+    stringsAsFactors = FALSE
+)
+
+write.csv(
+    file="../../extdata/metadata-lohoff-seqfish-biorxiv.csv",
+    rbind(info1, info2), 
+    row.names=FALSE)
 
 ```
 
