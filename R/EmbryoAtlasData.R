@@ -81,5 +81,5 @@ EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.splice
     if(get.spliced){
         versions <- c(versions, list(spliced="1.4.0"))
     }
-    .getProcOrRaw("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
+    .getRNAseqData("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
 }

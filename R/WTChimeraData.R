@@ -79,5 +79,5 @@
 WTChimeraData <- function(type=c("processed", "raw"), samples=NULL) {
     type <- match.arg(type)
     versions <- list(base="1.0.0")
-    .getProcOrRaw("wt-chimera", type, versions, samples, sample.options=as.character(seq_len(10)), sample.err="1:10")
+    .getRNAseqData("wt-chimera", type, versions, samples, sample.options=as.character(seq_len(10)), sample.err="1:10")
 }

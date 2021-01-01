@@ -91,5 +91,5 @@ TChimeraData <- function(type=c("processed", "raw"), samples=c(1:2, 5:16)) {
         warning("You are downloading the QC-fail samples 3 and/or 4.")
     type <- match.arg(type)
     versions <- list(base="1.4.0")
-    .getProcOrRaw("t-chimera", type, versions, samples, sample.options=as.character(seq_len(16)), sample.err="1:16")
+    .getRNAseqData("t-chimera", type, versions, samples, sample.options=as.character(seq_len(16)), sample.err="1:16")
 }
