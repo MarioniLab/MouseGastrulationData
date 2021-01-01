@@ -255,7 +255,7 @@ saveRDS(rowData(sce_imp), file=paste0(base, "/rowdata-imputed.rds"))
 for(samp in unique(sce_imp$sample)){
     sub = sce_imp[, sce_imp$sample == samp]
     saveRDS(assay(sub, "logcounts_imputed"), 
-        file=paste0(base, "/logcounts-imputed-processed-sample", samp, ".rds"))
+        file=paste0(base, "/logcounts-imputed-sample", samp, ".rds"))
 }
 ```
 
@@ -353,7 +353,7 @@ info2 <- data.frame(
     ),
     RDataPath = c(
         file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0", 
-            c(sprintf("logcounts-processed-sample%i.rds", unique(sce_imp$sample)),
+            c(sprintf("logcounts-imputed-sample%i.rds", unique(sce_imp$sample)),
                 "rowdata-imputed.rds"))
     ),
     BiocVersion="3.13",
