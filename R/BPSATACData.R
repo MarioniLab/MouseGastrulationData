@@ -84,5 +84,5 @@
 BPSATACData <- function(type=c("processed", "raw")) {
     type <- match.arg(type)
     versions <- list(base="1.6.0")
-    .getProcOrRaw("BPS_atac", type, versions, samples=1, sample.options=as.character(1), sample.err="1")
+    .getRNAseqData("BPS_atac", type, versions, samples=1, sample.options=as.character(1), sample.err="1")
 }

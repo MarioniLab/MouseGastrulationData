@@ -70,5 +70,5 @@
 Tal1ChimeraData <- function(type=c("processed", "raw"), samples=NULL) {
     type <- match.arg(type)
     versions <- list(base="1.0.0")
-    .getProcOrRaw("tal1-chimera", type, versions, samples, sample.options=as.character(seq_len(4)), sample.err="1:4")
+    .getRNAseqData("tal1-chimera", type, versions, samples, sample.options=as.character(seq_len(4)), sample.err="1:4")
 }

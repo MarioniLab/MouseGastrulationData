@@ -7,7 +7,7 @@
 #' @importFrom methods as
 #' @importFrom SummarizedExperiment rowData
 #' @importFrom SummarizedExperiment colData
-.getProcOrRaw <- function(dataset, type, version, samples, sample.options, sample.err){
+.getRNAseqData <- function(dataset, type, version, samples, sample.options, sample.err){
     hub <- ExperimentHub()
     host <- file.path("MouseGastrulationData", dataset)
     #default to all samples
@@ -80,7 +80,7 @@
 
 #from Aaron Lun's celldex with modification
 #for consistent usage in-package, use "base" as element 1, anything 
-#with a different version gets an entry in version in .getProcOrRaw
+#with a different version gets an entry in version in .getRNAseqData
 #there should be in {counts,spliced,raw_counts,
 #sizefactors,rowData,colData,reducedDims}
 #spliced represents version for all spliced count measurements

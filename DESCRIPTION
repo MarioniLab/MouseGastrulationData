@@ -1,12 +1,13 @@
 Package: MouseGastrulationData
-Title: Single-Cell Transcriptomics Data across Mouse Gastrulation and Early Organogenesis
+Title: Single-Cell -omics Data across Mouse Gastrulation and Early Organogenesis
 Version: 1.5.3
 Authors@R: c(
     person("Jonathan", "Griffiths", email = "jonathan.griffiths.94@gmail.com", role = c("aut", "cre")),
     person("Aaron", "Lun", email = "infinite.monkeys.with.keyboards@gmail.com", role = "aut"))
 Description: 
-    Provides processed and raw count matrices for single-cell RNA sequencing data 
-    from a timecourse of mouse gastrulation and early organogenesis.
+    Provides processed and raw count data for single-cell RNA sequencing,
+    single-cell ATAC-seq, and seqFISH (spatial transcriptomic) experiments
+    performed along a timecourse of mouse gastrulation and early organogenesis.
 Depends: 
     R (>= 4.1),
     SingleCellExperiment,
@@ -25,7 +26,7 @@ VignetteBuilder:
 License: GPL-3
 NeedsCompilation: no
 Encoding: UTF-8
-biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData, SingleCellData, ExperimentHub
+biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData, SingleCellData, ExperimentHub, Mus_musculus_Data
 URL: https://github.com/MarioniLab/MouseGastrulationData
 BugReports: https://github.com/MarioniLab/MouseGastrulationData/issues
 RoxygenNote: 7.1.1
