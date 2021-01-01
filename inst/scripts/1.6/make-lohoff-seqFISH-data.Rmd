@@ -263,7 +263,7 @@ for(samp in unique(sce_imp$sample)){
 
 We quickly plot the heart gene _Titin_ in both imputed and actual datasets to show that the data is ordered correctly.
 
-```{r, fig.wide=TRUE}
+```{r, fig.wide=TRUE, fig.height=6}
 pdf = data.frame(
     x=spatialCoords(sce)$x,
     y=spatialCoords(sce)$y,
@@ -345,22 +345,22 @@ info1 <- data.frame(
 info2 <- data.frame(
     Title = sprintf("Lohoff biorXiv imputed %s",
         c(sprintf("processed logcounts (sample %i)", unique(sce_imp$sample)),
-            "rowData"
+            "rowData")
     ),
     Description = sprintf("%s for the E8.5 imputed seqFISH dataset from biorXiv", 
         c(sprintf("Processed logcounts for sample %i", unique(sce_imp$sample)),
-            "Per-gene metadata for all samples"
+            "Per-gene metadata for all samples")
     ),
     RDataPath = c(
         file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0", 
             c(sprintf("logcounts-processed-sample%i.rds", unique(sce_imp$sample)),
-                "rowdata.rds"
+                "rowdata-imputed.rds"))
     ),
     BiocVersion="3.13",
     Genome="mm10",
     SourceType=c(
         rep("HDF5", length(unique(sce_imp$sample))),
-        rep("RDS", length(unique(sce_imp$sample)) * 2 + 1)),
+        "RDS"),
     SourceUrl="https://content.cruk.cam.ac.uk/jmlab/SpatialMouseAtlas2020/",
     SourceVersion=c(
         rep("imputed.h5", length(unique(sce_imp$sample))),
