@@ -14,8 +14,8 @@ knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
 
 # Overview
 
-Here we will get the data for Pijuan-Sala et al.'s E8.25 ATAC-seq dataset.
-As I haven't been involved in this dataset, for information on their methods please see their paper
+Here we will get the data for Lohoff et al.'s E8.5 seqFISH dataset.
+As I haven't been involved in the analysis of this dataset once generated: for information on their methods, please see their paper.
 
 # Preparing the processed data
 
@@ -83,38 +83,28 @@ for(i in seq_len(ncol(meta))){
 ```
 
 
-Something something size factors
+We reconstruct the size factors as the authors did.
 
 ```{r}
 sfs <- colSums(counts) - counts["Xist",]
 sfs <- sfs/mean(sfs)
+```
+
+We note that while there are some mismatches between my normalised values and those provided by the authors, the differences are rounding errors, as shown in the plot below.
+
+```{r}
+library(ggplot2)
 my_norm = Matrix(log2(sweep(counts, 2, sfs, "/")+1), sparse = TRUE)
 table(my_norm[my_norm > 0] == norm[my_norm > 0])
-
 mismatches = which(my_norm[my_norm > 0] != norm[my_norm > 0])
-table(row(counts)[mismatches])
-
-reNormalise = function(sce_filt) {
-  assay(sce_filt, "logcounts") <- logcounts(scater::logNormCounts(
-    sce_filt, size_factors = sce_filt$total - counts(sce_filt)["Xist",]))
-  return(sce_filt)
-}
-#area
-sfs <- meta$Area/mean(meta$Area)
-lc.area <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
-table(lc.area[lc.area > 0] == norm[lc.area > 0])
-
-#counts not Xist
-cs <- colSums(counts[rownames(counts) != "Xist",])
-sfs <- (1/cs)/mean(1/cs)
-lc.counts <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
-table(lc.counts[lc.counts > 0] == norm[lc.counts > 0])
-
-
-sfs = edgeR::calcNormFactors(counts)
-edgeR.counts <- Matrix(log2(t(t(counts)/sfs) + 1), sparse=TRUE)
-table(edgeR.counts[edgeR.counts > 0] == norm[edgeR.counts > 0])
+ggplot(mapping=aes(x = my_norm[mismatches], y = my_norm[mismatches] - norm[mismatches])) +
+    geom_point() +
+    theme_minimal() +
+    labs(x = "logcount", y = "author-me logcount difference") +
+    ggtitle("Mismatched values only are shown")
 ```
+
+We therefore proceed with the sizefactors that I have calculated here.
 
 We need to make our own rowData here.
 We will do so from the existing MGD rowData from the atlas.
@@ -130,6 +120,7 @@ rownames(rd) <- rownames(counts) <- rd$ENSEMBL
 
 mRNA spots and segmentation paths are a special kind of data for seqFISH experiments.
 We can incorporate these into the SCE using `BumpyMatrix` files.
+We will call them `molecules` in the `SpatialExperiment` object to keep them separate from the Visium spots.
 
 ```{r}
 library(BumpyMatrix)
@@ -170,7 +161,7 @@ library(SpatialExperiment)
 sce <- SpatialExperiment(
     assays = List(
         counts = counts,
-        spots = spots_bm
+        molecules = spots_bm
     ),
     colData = meta,
     rowData = rd,
@@ -192,8 +183,8 @@ for(samp in unique(sce$sample)){
     sub = sce[, sce$sample == samp]
     saveRDS(counts(sub), 
         file=paste0(base, "/counts-processed-sample", samp, ".rds"))
-    saveRDS(assays(sub, "spots"), 
-        file=paste0(base, "/spots-processed-sample", samp, ".rds"))
+    saveRDS(assay(sub, "molecules"), 
+        file=paste0(base, "/molecules-processed-sample", samp, ".rds"))
     saveRDS(colData(sub), 
         file=paste0(base, "/coldata-sample", samp, ".rds"))
     saveRDS(sizeFactors(sub), 
@@ -242,7 +233,7 @@ match <- which(!is.na(ens))
 table(rn_imp[match] == atlas_rd$SYMBOL[match])
 ```
 
-In addition, pers. comm.s confirmed that the genes are ordered the same.
+In addition, personal communication confirmed that the genes are ordered the same.
 Altogether, we take the atlas rowData forward for this dataset.
 
 ```{r}
@@ -260,18 +251,38 @@ sce_imp <- SpatialExperiment(
 Now we can save this, split by sample
 
 ```{r}
-base <- file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv_imputed", "1.6.0")
-dir.create(base, recursive=TRUE, showWarnings=FALSE)
-saveRDS(rowData(sce_imp), file=paste0(base, "/rowdata.rds"))
+saveRDS(rowData(sce_imp), file=paste0(base, "/rowdata-imputed.rds"))
 for(samp in unique(sce_imp$sample)){
     sub = sce_imp[, sce_imp$sample == samp]
-    saveRDS(logcounts(sub), 
-        file=paste0(base, "/logcounts-processed-sample", samp, ".rds"))
-    saveRDS(colData(sub), 
-        file=paste0(base, "/coldata-sample", samp, ".rds"))
-    saveRDS(spatialCoords(sub), 
-        file=paste0(base, "/spatial-coords-sample", samp, ".rds"))
+    saveRDS(assay(sub, "logcounts_imputed"), 
+        file=paste0(base, "/logcounts-imputed-processed-sample", samp, ".rds"))
 }
+```
+
+## Showing that the data is correctly ordered
+
+We quickly plot the heart gene _Titin_ in both imputed and actual datasets to show that the data is ordered correctly.
+
+```{r, fig.wide=TRUE}
+pdf = data.frame(
+    x=spatialCoords(sce)$x,
+    y=spatialCoords(sce)$y,
+    ttn=counts(sce)[match("Ttn", rowData(sce)$SYMBOL),],
+    ttn_imp=assay(sce_imp, "logcounts_imputed")[match("Ttn", rowData(sce_imp)$SYMBOL),])
+pdf = pdf[sce$sample == 1,]
+pdf = pdf[order(pdf$ttn),]
+ggplot(pdf, aes(x=x,y=y,col=ttn)) +
+    geom_point() +
+    scale_colour_viridis_c() +
+    theme_minimal() +
+    ggtitle("Actual counts")
+
+pdf = pdf[order(pdf$ttn_imp),]
+ggplot(pdf, aes(x=x,y=y,col=ttn_imp)) +
+    geom_point() +
+    scale_colour_viridis_c() +
+    theme_minimal() +
+    ggtitle("Imputed logcounts")
 ```
 
 # Make file metadata
@@ -286,8 +297,8 @@ info1 <- data.frame(
             sprintf("colData (sample %i)", unique(sce$sample)),
             sprintf("size factors (sample %i)", unique(sce$sample)),
             sprintf("reduced dimensions (sample %i)", unique(sce$sample)),
-            sprintf("spatial coordinates (sample %i)", unique(sce$sample)),
-            sprintf("spots (sample %i)", unique(sce$sample)))
+            sprintf("molecule coordinates (sample %i)", unique(sce$sample)),
+            sprintf("spatial coordinates (sample %i)", unique(sce$sample)))
     ),
     Description = sprintf("%s for the E8.5 seqFISH dataset from biorXiv", 
         c(sprintf("Processed counts for sample %i", unique(sce$sample)),
@@ -295,8 +306,8 @@ info1 <- data.frame(
             sprintf("Per-cell metadata for sample %i", unique(sce$sample)),
             sprintf("Size factors for sample %i", unique(sce$sample)),
             sprintf("Reduced dimensions for sample %i", unique(sce$sample)),
-            sprintf("Cell spatial coordinates for sample %i", unique(sce$sample)),
-            sprintf("RNA spot coordinates for sample %i", unique(sce$sample)))
+            sprintf("RNA molecule coordinates for sample %i", unique(sce$sample)),
+            sprintf("Cell spatial coordinates for sample %i", unique(sce$sample)))
     ),
     RDataPath = c(
         file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0", 
@@ -305,7 +316,7 @@ info1 <- data.frame(
                 sprintf("coldata-sample%i.rds", unique(sce$sample)),
                 sprintf("sizefac-sample%i.rds", unique(sce$sample)),
                 sprintf("reduced-dims-sample%i.rds", unique(sce$sample)),
-                sprintf("spots-processed-sample%i.rds", unique(sce$sample)),
+                sprintf("molecules-processed-sample%i.rds", unique(sce$sample)),
                 sprintf("spatial-coords-sample%i.rds", unique(sce$sample))))
     ),
     BiocVersion="3.13",
@@ -334,22 +345,16 @@ info1 <- data.frame(
 info2 <- data.frame(
     Title = sprintf("Lohoff biorXiv imputed %s",
         c(sprintf("processed logcounts (sample %i)", unique(sce_imp$sample)),
-            "rowData",
-            sprintf("colData (sample %i)", unique(sce_imp$sample)),
-            sprintf("spatial coordinates (sample %i)", unique(sce_imp$sample)))
+            "rowData"
     ),
     Description = sprintf("%s for the E8.5 imputed seqFISH dataset from biorXiv", 
         c(sprintf("Processed logcounts for sample %i", unique(sce_imp$sample)),
-            "Per-gene metadata for all samples",
-            sprintf("Per-cell metadata for sample %i", unique(sce_imp$sample)),
-            sprintf("Cell spatial coordinates for sample %i", unique(sce_imp$sample)))
+            "Per-gene metadata for all samples"
     ),
     RDataPath = c(
-        file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv_imputed", "1.6.0", 
+        file.path("MouseGastrulationData", "lohoff_seqfish_biorxiv", "1.6.0", 
             c(sprintf("logcounts-processed-sample%i.rds", unique(sce_imp$sample)),
-                "rowdata.rds",
-                sprintf("coldata-sample%i.rds", unique(sce_imp$sample)),
-                sprintf("spatial-coords-sample%i.rds", unique(sce_imp$sample))))
+                "rowdata.rds"
     ),
     BiocVersion="3.13",
     Genome="mm10",
@@ -359,9 +364,7 @@ info2 <- data.frame(
     SourceUrl="https://content.cruk.cam.ac.uk/jmlab/SpatialMouseAtlas2020/",
     SourceVersion=c(
         rep("imputed.h5", length(unique(sce_imp$sample))),
-        "imputed_row_names.Rds",
-        rep("metadata.Rds", length(unique(sce_imp$sample))),
-        rep("metadata.Rds", length(unique(sce_imp$sample)))
+        "imputed_row_names.Rds"
     ),
     Species="Mus musculus",
     TaxonomyId="10090",
