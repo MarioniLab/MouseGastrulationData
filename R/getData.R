@@ -22,8 +22,10 @@
     sf_name="sizefac",
     assays=list("counts" = "counts-processed"),
     dimred_name="reduced-dims",
-    coords_name="spatial-coords"
+    coords_name="spatial-coords",
+    object_type=c("SingleCellExperiment", "SpatialExperiment")
 ){
+    object_type <- match.arg(object_type)
     hub <- ExperimentHub()
     host <- file.path("MouseGastrulationData", dataset)
     #default to all samples
@@ -47,9 +49,13 @@
         do.call(cbind, samp_list)
     })
     names(assay_list) = names(assays)
-    sce <- SingleCellExperiment(
-        assays=assay_list
-    )
+    if(object.type == "SingleCellExperiment"){
+        sce <- SingleCellExperiment(assays=assay_list)
+    } else if (object.type == "SpatialExperiment"){
+        sce <- SpatialExperiment(assays=assay_list)
+    } else {
+        stop("Unexpected object_type (not SCE/SpatialE)")
+    }
     if(!is.null(rd_name)){
         ver <- .fetch_version(version, "rowdata")
         rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(rd_name, ".rds"))][[1]]
@@ -94,7 +100,8 @@
             sf_name="sizefac",
             assays=c(list("counts" = "counts-processed"), extra_assays),
             dimred_name="reduced-dims",
-            coords_name=NULL
+            coords_name=NULL,
+            object_type="SingleCellExperiment"
         ))
     } else if (type == "raw"){ return(
         .getData(
@@ -108,7 +115,8 @@
             sf_name=NULL,
             assays=list("counts" = "counts-raw"),
             dimred_name=NULL,
-            coords_name=NULL
+            coords_name=NULL,
+            object_type="SingleCellExperiment"
         ))
     }
 }
@@ -126,7 +134,8 @@
             sf_name="sizefac",
             assays=list("counts" = "counts-processed", "molecules" = "molecules-processed"),
             dimred_name="reduced-dims",
-            coords_name="spatial-coords"
+            coords_name="spatial-coords",
+            object_type="SpatialExperiment"
         ))
     } else if (type == "imputed"){
         .getData(
@@ -140,7 +149,8 @@
             sf_name=NULL,
             assays=list("imputed_logcounts" = "logcounts-imputed"),
             dimred_name=NULL,
-            coords_name="spatial-coords"
+            coords_name="spatial-coords",
+            object_type="SpatialExperiment"
         ))
     }
 }
