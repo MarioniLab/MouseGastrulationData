@@ -78,8 +78,19 @@
 EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.spliced=FALSE) {
     type <- match.arg(type)
     versions <- list(base="1.0.0")
+    extra_a <- NULL
     if(get.spliced){
-        versions <- c(versions, list(spliced="1.4.0"))
+        if(type=="raw"){
+            stop("Cannot get spliced counts with the raw data")
+        }
+        extra_a <- list(
+            spliced_counts="counts-spliced",
+            unspliced_counts="counts-unspliced",
+            ambiguous_counts="counts-ambig")
+        versions <- c(versions, list(
+            "counts-spliced"="1.4.0",
+            "counts-unspliced"="1.4.0",
+            "counts-ambig"="1.4.0"))
     }
-    .getRNAseqData("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37")
+    .getRNAseqData("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37", extra_assays = extra_a)
 }
