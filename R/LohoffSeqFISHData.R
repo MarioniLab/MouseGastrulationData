@@ -1,4 +1,72 @@
-LohoffSeqFISHData <- function(type=c("actual", "imputed"), samples=NULL, get.molecules=FALSE) {
+#' seqFISH data of E8.5 mouse embryos
+#'
+#' Obtain the observed or imputed counts for the Lohoff et al. E8.5 mouse embryo seqFISH dataset.
+#'
+#' @param type String specifying the type of data to obtain, see Details.
+#' Default behaviour is to return the observed data.
+#' @param samples Integer or character vector specifying the samples for which data (observed or imputed) should be obtained.
+#' If \code{NULL} (default), data are returned for all (6) samples.
+#' @param get.molecules Logical indicating whether to also download the positions of each observed mRNA molecule in each cell.
+#' 
+#' @return 
+#' If \code{type="observed"}, a \linkS4class{SpatialExperiment} is returned containing the observed seqFISH data from selected samples.
+#'
+#' If \code{type="imputed"}, a \linkS4class{SpatialExperiment} is returned containing the transcriptome-wide logcounts imputed from 
+#' the scRNA-seq data from selected samples.
+#' 
+#' @details
+#' This function downloads the seqFISH data from Lohoff et al. (2020).
+#' The dataset contains 6 seqFISH samples; consecutive samples (1 and 2, etc.) are from different sections taken from the same embryo.
+#' 
+#' 
+#' In the observed data, mRNA counts and molecule locations are available for the 351 genes in the seqFISH panel.
+#' The count matrix contains the raw count vectors for the cells called from all samples in this manner.
+#' Size factors were computed from the total observed counts for each cell, excluding the sex-specific gene Xist.
+#' For both observed and imputed data, the row metadata contains the Ensembl ID and MGI symbol for each gene.
+#' The column metadata for cells contains:
+#' \describe{
+#' \item{\code{cell}:}{Character, unique cell identifier across all samples.}
+#' \item{\code{embryo}:}{Character, embryo ID for each cell.}
+#' \item{\code{pos}:}{Character, name of the imaging region (i.e., encodes batch effects within a sample).}
+#' \item{\code{embryo_pos}:}{Character, concatenated embryo name and imaging region.}
+#' \item{\code{embryo_pos_z}:}{Character, concatenated embryo name, imaging region, and z position. Represents groups of (in principle) batch-effect-free cells.}
+#' \item{\code{area}:}{Integer, number of pixels enclosed by the segmentation mask for each cell.}
+#' \item{\code{celltype}:}{Character, celltype label for each cell. Note that it does not match exactly with the scRNAseq atlas.}
+#' \item{\code{sample}:}{Integer, represents groups of cells from a single embryo at a single z-position. See above for details.}
+#' \item{\code{segmentation_vertices}:}{DataFrameList, contains a \code{DataFrame} for each cell with x and y segmentation vertices. These were calculated from cadherin (i.e. cell membrane) staining.}
+#' \item{\code{sizeFactor}:}{Numeric, size factor for normalisation.}
+#' }
+#' A UMAP representation of the data is also available in the \code{reducedDims} slot of the SingleCellExperiment object.
+#' 
+#' If molecule positions were requested, these will be in the assays slot of the SingleCellExperiment object.
+#' These are represented as a \code{BumpyMatrix} object, with each cell of the matrix containing a DataFrame of positions for each mRNA molecule.
+#' Each entry contains the positions of each mRNA molecule for the corresponding gene (row) and cell (column) of the SpatialExperiment object.
+#' 
+#' The "observed" data the observed molecule counts from the experiment for the 351 genes assayed.
+#' The "imputed" data contains transcriptome-wide data imputed from the scRNAseq atlas.
+#' These data are in the assay slot \code{imputed_logcounts}.
+#' Note that these are much less sparse than scRNA-seq matrices, and are large in memory.
+#' The imputed SpatialExperiment object is identical to that obtained for the observed data, except for the difference in assay slots, rowData, and the absence of sizeFactors (as the data was imputed from the normalised atlas).
+#' 
+#'
+#' @author Jonathan Griffiths
+#' @examples
+#' seqfish.data <- LohoffSeqFISHData(samples = 1)
+#'
+#'
+#' @references
+#' Lohoff T, Ghazanfar S et al. (2020). 
+#' Highly multiplexed spatially resolved gene expression profiling of mouse organogenesis. 
+#' \emph{bioRxiv} 2020.11.20.391896.
+#'
+#' @export
+#' @importFrom ExperimentHub ExperimentHub
+#' @importFrom SpatialExperiment SpatialExperiment
+#' @importFrom BumpyMatrix BumpyMatrix
+#' @importFrom BiocGenerics sizeFactors
+#' @importClassesFrom S4Vectors DataFrame
+#' @importFrom methods as
+LohoffSeqFISHData <- function(type=c("observed", "imputed"), samples=NULL, get.molecules=FALSE) {
     type <- match.arg(type)
     versions <- list(base="1.6.0")
     extra_a <- NULL
