@@ -4,6 +4,7 @@
 #' @importFrom ExperimentHub ExperimentHub
 #' @importFrom SingleCellExperiment SingleCellExperiment 
 #' @importFrom SpatialExperiment SpatialExperiment 
+#' @importFrom BumpyMatrix BumpyMatrix 
 #' @importFrom BiocGenerics sizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importClassesFrom S4Vectors DataFrame
@@ -69,12 +70,14 @@
     if(!is.null(dimred.name)){
         dr_list <- EXTRACTOR(dimred.name)
         dr_types <- names(dr_list[[1]])
-        reducedDims(sce) <- lapply(dr_types, function(x){
+        dr_sce <- lapply(dr_types, function(x){
             do.call(rbind, lapply(dr_list, function(y) y[[x]]))
         })
+        names(dr_sce) <- dr_types
+        reducedDims(sce) <- dr_sce
     }
     if(!is.null(coords.name)){
-        spatialCoords(sce) = EXTRACTOR(coords.name)
+        spatialCoords(sce) = do.call(rbind, EXTRACTOR(coords.name))
     }
     if("ENSEMBL" %in% names(rowData(sce))){
         rownames(sce) <- rowData(sce)$ENSEMBL
@@ -84,6 +87,7 @@
     }
     return(sce)
 }
+
 ####
 # Simpler interfaces for specific data types
 ####
@@ -122,7 +126,7 @@
 }
 
 .getSeqFISHData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL){
-    if(type == "actual"){
+    if(type == "observed"){
         .getData(
             dataset,
             version,

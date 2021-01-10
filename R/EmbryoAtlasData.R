@@ -18,6 +18,7 @@
 #' @details
 #' This function downloads the data for the embryo atlas from Pijuan-Sala et al. (2019).
 #' The dataset contains 36 10X Genomics samples; sample 11 is absent due to QC failure.
+#' The \code{AtlasSampleMetadata} variable contains information about each of these samples.
 #' 
 #' 
 #' In the processed data, cell-containing libraries have already been identified in each sample
