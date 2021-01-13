@@ -5,26 +5,25 @@
 #' @importFrom SingleCellExperiment SingleCellExperiment 
 #' @importFrom SpatialExperiment SpatialExperiment 
 #' @importFrom BumpyMatrix BumpyMatrix 
-#' @importFrom BiocGenerics sizeFactors
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom S4Vectors List
 #' @importFrom methods as
 #' @importFrom SummarizedExperiment rowData
+#' @importFrom SummarizedExperiment rowData<-
 #' @importFrom SummarizedExperiment colData
+#' @importFrom SummarizedExperiment colData<-
+#' @importFrom SingleCellExperiment reducedDims<-
+#' @importFrom SpatialExperiment spatialCoords<-
 .getData <- function(
     dataset,
     version,
     samples,
     sample.options,
     sample.err,
-    rd.name="rowdata",
-    cd.name="coldata",
-    sf.name="sizefac",
-    assays=list("counts" = "counts-processed"),
-    dimred.name="reduced-dims",
-    coords.name="spatial-coords",
-    object.type=c("SingleCellExperiment", "SpatialExperiment")
+    names,
+    object.type=c("SingleCellExperiment", "SpatialExperiment"),
+    return.list=FALSE
 ){
     object.type <- match.arg(object.type)
     hub <- ExperimentHub()
@@ -38,6 +37,13 @@
     if (!all(samples %in% sample.options) || length(samples)==0) {
         stop(sprintf("'samples' must be in %s", sample.err))
     }
+
+    if(return.list){
+        out <- lapply(samples, function(x){ .getData(dataset, version, x,
+            sample.options, sample.err, names, object.type, return.list=FALSE)})
+        names(out) <- samples
+        return(out)
+    }
     # Temporary function for data extraction
     EXTRACTOR <- function(target) {
         ver <- .fetch_version(version, target)
@@ -45,30 +51,33 @@
             hub[hub$rdatapath==file.path(host, ver, sprintf("%s-sample%s.rds", target, i))][[1]]
         })
     }
-    assay_list <- lapply(seq_along(assays), function(x){
-        samp_list = EXTRACTOR(assays[[x]])
-        do.call(cbind, samp_list)
-    })
-    names(assay_list) = names(assays)
+    GET_ASSAYS <- function(ass){
+        assay_list <- lapply(seq_along(ass), function(x){
+            samp_list = EXTRACTOR(ass[[x]])
+            do.call(cbind, samp_list)
+        })
+        names(assay_list) = names(ass)
+        return(assay_list)
+    }
     if(object.type == "SingleCellExperiment"){
-        sce <- SingleCellExperiment(assays=assay_list)
+        sce <- SingleCellExperiment(assays=GET_ASSAYS(names$assays))
     } else if (object.type == "SpatialExperiment"){
-        sce <- SpatialExperiment(assays=assay_list)
+        sce <- SpatialExperiment(assays=GET_ASSAYS(names$assays))
     } else {
         stop("Unexpected object.type (not SCE/SpatialE)")
     }
-    if(!is.null(rd.name)){
+    if(!is.null(names$rd)){
         ver <- .fetch_version(version, "rowdata")
-        rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(rd.name, ".rds"))][[1]]
+        rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
     }
-    if(!is.null(cd.name)){
-        colData(sce) <- do.call(rbind, EXTRACTOR(cd.name))
+    if(!is.null(names$cd)){
+        colData(sce) <- do.call(rbind, EXTRACTOR(names$cd))
     }
-    if(!is.null(sf.name)){
-        sizeFactors(sce) <- do.call(c, EXTRACTOR(sf.name))
+    if(!is.null(names$sf)){
+        sizeFactors(sce) <- do.call(c, EXTRACTOR(names$sf))
     }
-    if(!is.null(dimred.name)){
-        dr_list <- EXTRACTOR(dimred.name)
+    if(!is.null(names$dimred)){
+        dr_list <- EXTRACTOR(names$dimred)
         dr_types <- names(dr_list[[1]])
         dr_sce <- lapply(dr_types, function(x){
             do.call(rbind, lapply(dr_list, function(y) y[[x]]))
@@ -76,8 +85,8 @@
         names(dr_sce) <- dr_types
         reducedDims(sce) <- dr_sce
     }
-    if(!is.null(coords.name)){
-        spatialCoords(sce) = do.call(rbind, EXTRACTOR(coords.name))
+    if(!is.null(names$coords)){
+        spatialCoords(sce) = do.call(rbind, EXTRACTOR(names$coords))
     }
     if("ENSEMBL" %in% names(rowData(sce))){
         rownames(sce) <- rowData(sce)$ENSEMBL
@@ -99,12 +108,13 @@
             samples,
             sample.options,
             sample.err,
-            rd.name="rowdata",
-            cd.name="coldata",
-            sf.name="sizefac",
-            assays=c(list("counts" = "counts-processed"), extra_assays),
-            dimred.name="reduced-dims",
-            coords.name=NULL,
+            names = list(
+                assays=c(list("counts" = "counts-processed"), extra_assays),
+                rd="rowdata",
+                cd="coldata",
+                sf="sizefac",
+                dimred="reduced-dims"
+            ),
             object.type="SingleCellExperiment"
         ))
     } else if (type == "raw"){ return(
@@ -114,13 +124,12 @@
             samples,
             sample.options,
             sample.err,
-            rd.name="rowdata",
-            cd.name=NULL,
-            sf.name=NULL,
-            assays=list("counts" = "counts-raw"),
-            dimred.name=NULL,
-            coords.name=NULL,
-            object.type="SingleCellExperiment"
+            names = list(
+                assays=list("counts" = "counts-raw"),
+                rd="rowdata"
+            ),
+            object.type="SingleCellExperiment",
+            return.list=TRUE
         ))
     }
 }
@@ -133,12 +142,14 @@
             samples,
             sample.options,
             sample.err,
-            rd.name="rowdata",
-            cd.name="coldata",
-            sf.name="sizefac",
-            assays=c(list("counts" = "counts-processed"), extra_assays),
-            dimred.name="reduced-dims",
-            coords.name="spatial-coords",
+            names = list(
+                assays=c(list("counts" = "counts-processed"), extra_assays),
+                rd="rowdata",
+                cd="coldata",
+                sf="sizefac",
+                dimred="reduced-dims",
+                coords="spatial-coords"
+            ),
             object.type="SpatialExperiment"
         )
     } else if (type == "imputed"){
@@ -148,12 +159,12 @@
             samples,
             sample.options,
             sample.err,
-            rd.name="rowdata-imputed",
-            cd.name="coldata",
-            sf.name=NULL,
-            assays=list("imputed_logcounts" = "logcounts-imputed"),
-            dimred.name=NULL,
-            coords.name="spatial-coords",
+            names = list(
+                assays=list("imputed_logcounts" = "logcounts-imputed"),
+                rd="rowdata-imputed",
+                cd="coldata",
+                coords="spatial-coords"
+            ),
             object.type="SpatialExperiment"
         )
     }
@@ -161,7 +172,7 @@
 
 #from Aaron Lun's celldex with modification
 #for consistent usage in-package, use "base" as element 1, and use field as the 
-# strings supplied to "*.name" to programmatically identify the right version
+# strings supplied to the names list to programmatically identify the right version
 .fetch_version <- function(version, field) {
     opt <- version[[field]]
     if (is.null(opt)) {

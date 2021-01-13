@@ -11,12 +11,14 @@ Description:
 Depends: 
     R (>= 4.1),
     SingleCellExperiment,
-    SummarizedExperiment
+    SummarizedExperiment,
+    SpatialExperiment
 Imports:
     methods,
     ExperimentHub,
     BiocGenerics,
-    S4Vectors
+    S4Vectors,
+    BumpyMatrix
 Suggests: 
     BiocStyle, 
     knitr, 
