@@ -57,6 +57,7 @@ rownames(norm)[which(rownames(norm) == "Cavin3")] = "Prkcdbp"
 
 We also can take the cell metadata and tweak some entries for consistency with our other data types.
 We separate a data frame of cell positions from it, as well.
+We consider Z-slices from each embryo as separate samples.
 
 ```{r}
 meta <- readRDS(paths[["metadata.Rds"]])
@@ -67,7 +68,7 @@ meta <- meta[,!grepl("UMAP", colnames(meta))]
 names(meta)[names(meta) == "uniqueID"] <- "cell"
 names(meta)[names(meta) == "celltype_mapped_refined"] <- "celltype"
 names(meta)[names(meta) == "Area"] <- "area"
-meta$sample <- as.numeric(gsub("embryo", "", meta$embryo))
+meta$sample <- as.numeric(as.factor(paste(meta$embryo, meta$z)))
 
 cell_pos <- meta[,c(
     which(grepl("^[xy]_global_affine", names(meta))),
