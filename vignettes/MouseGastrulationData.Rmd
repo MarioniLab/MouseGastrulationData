@@ -18,12 +18,14 @@ knitr::opts_chunk$set(error=FALSE, warning=FALSE, message=FALSE)
 
 # Introduction
 
-The `r Biocpkg("MouseGastrulationData")` package provides convenient access to the single-cell RNA sequencing (scRNA-seq) datasets from @pijuan-sala_single-cell_2019, and additional data generated in similar systems.
-This primary study focuses on mouse gastrulation and organogenesis, providing transcriptomic profiles at single-cell resolution across several stages of early development.
-Datasets are provided as count matrices with additional feature- and sample-level metadata after processing.
-Raw sequencing data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/).
+The `r Biocpkg("MouseGastrulationData")` package provides convenient access to various -omics datasets from mouse gastrulation and organogeneis.
+These datasets are provided in a highly annotated format, so can be used very easily to probe different biological questions, or for methods development.
+The primary datasets are the single-cell RNA sequencing (scRNA-seq) datasets from @pijuan-sala_single-cell_2019 and @guibentif2020diverse.
+These include an atlas of embryonic development (`EmbryoAtlasData()`) with high sampling density across time, alongside chimaera experiments, that include gene knockouts in an _in vivo_ system.
+These Datasets are provided as count matrices with additional feature- and sample-level metadata after processing.
+Raw sequencing data can be acquired from ArrayExpress accession [E-MTAB-6967](https://www.ebi.ac.uk/arrayexpress/experiments/E-MTAB-6967/) for the atlas.
 
-In addition, the package also contains perturbation data in the form of chimaeric embryos, single-nucleus ATAC-seq data from E8.25 embryos, and will soon contain seqFISH data from E8.5 embryos.
+In addition, the package also provides single-nucleus ATAC-seq data from E8.25 embryos (@BPS_atac), and seqFISH (i.e. spatial transcriptomic) data from E8.5 embryos (@lohoff_highly_2020).
 
 # Installation
 
@@ -36,9 +38,8 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install("MouseGastrulationData")
 ```
 
-BiocManager also supports installation of the development version of the package from Github.
-However, I would recommend that you use the _Bioconductor_ development version of the package, as development versions of the package may have dependencies on development versions of other _Bioconductor_ packages.
-Instructions for installation of _Bioconductor_ devel. are available [on their website](https://www.bioconductor.org/developers/how-to/useDevel/).
+_Bioconductor_ devel includes the most recent datasets and changes to the package.
+Instructions for installation of _Bioconductor_ devel are available [on their website](https://www.bioconductor.org/developers/how-to/useDevel/).
 
 To use the package, load it in the typical way.
 
@@ -210,10 +211,19 @@ Unfiltered count matrices are also provided for each sample in these datasets.
 
 # snATAC-seq data information
 
-Data from @BPS_atac is available in this package in the `BPSATACData` function.
+Data from @BPS_atac is available in this package in the `BPSATACData()` function.
 As the package authors were not involved in this study, we leave it to users to familiarise themselves with the methods used in that paper, [linked here](https://pubmed.ncbi.nlm.nih.gov/32231307/).
 Because this data is measured in units of open chromatin, its format is quite different to the other datasets, so it is advised to consult the manual page for the function for more information.
 Raw sequencing data is available at GEO accession [GSE133244](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE133244).
+
+# seqFISH data information
+
+Data from @lohoff_highly_2020 is available in this package in the `LohoffSeqFISHData()` function.
+Methods for the generation of this data may be found in their [biorXiv submission](https://www.biorxiv.org/content/10.1101/2020.11.20.391896v1).
+This data is provided as a `r Biocpkg("SpatialExperiment")` object.
+This includes the locations of individual RNA molecules within cells, and also segmentation masks for each cell.
+Segmentation masks were determined from cell membrane staining, not from simple distance-to-nuclei methods, which is a unique aspect of this dataset (at the time of its publication).
+See the function manual page for information on how this data is delivered.
 
 # Accessory data information
 
