@@ -15,7 +15,9 @@
 #' @importFrom SummarizedExperiment colData
 #' @importFrom SummarizedExperiment colData<-
 #' @importFrom SingleCellExperiment reducedDims<-
-#' @importFrom SpatialExperiment spatialCoords<-
+#' @importFrom SpatialExperiment spatialData<-
+#' @importFrom SpatialExperiment spatialData
+#' @importFrom SpatialExperiment spatialCoordsNames<-
 .getData <- function(
     dataset,
     version,
@@ -72,7 +74,14 @@
         rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
     }
     if(!is.null(names$cd)){
-        colData(sce) <- do.call(rbind, EXTRACTOR(names$cd))
+        cd <- do.call(rbind, EXTRACTOR(names$cd))
+        #This is a patch for the Lohoff data due to SpatialExperiment changes
+        #previously, sample_id was not required
+        if(!"sample_id" %in% names(cd))
+            cd$sample_id <- cd$embryo_pos_z
+        # suppress warning about changing the levels of sample_id
+        # we never set any, initially.
+        suppressWarnings(colData(sce) <- cd)
     }
     if(!is.null(names$sf)){
         sizeFactors(sce) <- do.call(c, EXTRACTOR(names$sf))
@@ -87,7 +96,9 @@
         reducedDims(sce) <- dr_sce
     }
     if(!is.null(names$coords)){
-        spatialCoords(sce) = do.call(rbind, EXTRACTOR(names$coords))
+        spatialData(sce) <- do.call(rbind, EXTRACTOR(names$coords))
+        coords <- c("x", "y", "z")
+        spatialCoordsNames(sce) <- coords[coords %in% names(spatialData(sce))]
     }
     if("ENSEMBL" %in% names(rowData(sce))){
         rownames(sce) <- rowData(sce)$ENSEMBL
