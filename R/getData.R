@@ -7,6 +7,7 @@
 #' @importFrom BumpyMatrix BumpyMatrix 
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importFrom BiocGenerics cbind
+#' @importFrom BiocGenerics rbind
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom S4Vectors List
 #' @importFrom methods as
