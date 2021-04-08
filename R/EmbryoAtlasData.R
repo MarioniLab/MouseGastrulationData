@@ -61,9 +61,9 @@
 #'
 #' @author Aaron Lun, with modification by Jonathan Griffiths
 #' @examples
-#' atlas.data <- EmbryoAtlasData(samples = 1)
+#' atlas.data <- EmbryoAtlasData(samples = 1:2)
 #'
-#' atlas.data <- EmbryoAtlasData(type="processed", samples = 1)
+#' atlas.data <- EmbryoAtlasData(type="processed", samples = 1:2)
 #'
 #' @references
 #' Pijuan-Sala B, Griffiths JA, Guibentif C et al. (2019). 
