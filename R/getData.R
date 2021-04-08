@@ -75,7 +75,9 @@
         rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
     }
     if(!is.null(names$cd)){
-        cd <- do.call(rbind, EXTRACTOR(names$cd))
+        #class change - atlas (at least) requires converting 
+        #to "new" version of DataFrame to work
+        cd <- do.call(rbind, lapply(EXTRACTOR(names$cd), DataFrame))
         #This is a patch for the Lohoff data due to SpatialExperiment changes
         #previously, sample_id was not required
         if(!"sample_id" %in% names(cd))
