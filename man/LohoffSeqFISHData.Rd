@@ -63,7 +63,7 @@ Note that these are much less sparse than scRNA-seq matrices, and are large in m
 The imputed SpatialExperiment object is identical to that obtained for the observed data, except for the difference in assay slots, rowData, and the absence of sizeFactors (as the data was imputed from the normalised atlas).
 }
 \examples{
-seqfish.data <- LohoffSeqFISHData(samples = 1)
+seqfish.data <- LohoffSeqFISHData(samples = 1:2)
 
 
 }

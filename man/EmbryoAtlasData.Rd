@@ -74,9 +74,9 @@ This may be useful if performing analyses that need to account for the ambient R
 For both raw and processed data, the row metadata contains the Ensembl ID and MGI symbol for each gene.
 }
 \examples{
-atlas.data <- EmbryoAtlasData(samples = 1)
+atlas.data <- EmbryoAtlasData(samples = 1:2)
 
-atlas.data <- EmbryoAtlasData(type="processed", samples = 1)
+atlas.data <- EmbryoAtlasData(type="processed", samples = 1:2)
 
 }
 \references{

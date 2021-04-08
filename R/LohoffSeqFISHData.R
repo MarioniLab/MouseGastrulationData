@@ -51,7 +51,7 @@
 #'
 #' @author Jonathan Griffiths
 #' @examples
-#' seqfish.data <- LohoffSeqFISHData(samples = 1)
+#' seqfish.data <- LohoffSeqFISHData(samples = 1:2)
 #'
 #'
 #' @references
