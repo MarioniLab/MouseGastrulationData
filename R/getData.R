@@ -48,6 +48,9 @@
         names(out) <- samples
         return(out)
     }
+
+    data = list()
+
     # Temporary function for data extraction
     EXTRACTOR <- function(target) {
         ver <- .fetch_version(version, target)
@@ -63,32 +66,35 @@
         names(assay_list) = names(ass)
         return(assay_list)
     }
-    if(object.type == "SingleCellExperiment"){
-        sce <- SingleCellExperiment(assays=GET_ASSAYS(names$assays))
-    } else if (object.type == "SpatialExperiment"){
-        sce <- SpatialExperiment(assays=GET_ASSAYS(names$assays))
-    } else {
-        stop("Unexpected object.type (not SCE/SpatialE)")
-    }
+
+    data$assays <- GET_ASSAYS(names$assays)
+    
     if(!is.null(names$rd)){
         ver <- .fetch_version(version, "rowdata")
-        rowData(sce) <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
+        data$rd <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
+    } else {
+        data$rd <- NULL
     }
+
     if(!is.null(names$cd)){
         #class change - atlas (at least) requires converting 
         #to "new" version of DataFrame to work
         cd <- do.call(rbind, lapply(EXTRACTOR(names$cd), DataFrame))
         #This is a patch for the Lohoff data due to SpatialExperiment changes
         #previously, sample_id was not required
-        if(!"sample_id" %in% names(cd))
+        if(object.type == "SpatialExperiment" & 
+            !"sample_id" %in% names(cd))
             cd$sample_id <- cd$embryo_pos_z
-        # suppress warning about changing the levels of sample_id
-        # we never set any, initially.
-        suppressWarnings(colData(sce) <- cd)
+        data$cd <- cd
+    } else {
+        data$cd <- NULL
     }
     if(!is.null(names$sf)){
-        sizeFactors(sce) <- do.call(c, EXTRACTOR(names$sf))
+        data$sf <- do.call(c, EXTRACTOR(names$sf))
+    } else {
+        data$sf <- NULL
     }
+
     if(!is.null(names$dimred)){
         dr_list <- EXTRACTOR(names$dimred)
         dr_types <- names(dr_list[[1]])
@@ -96,13 +102,39 @@
             do.call(rbind, lapply(dr_list, function(y) y[[x]]))
         })
         names(dr_sce) <- dr_types
-        reducedDims(sce) <- dr_sce
+        data$dimred <- dr_sce
+    } else {
+        data$dimred <- NULL
     }
+
     if(!is.null(names$coords)){
-        spatialData(sce) <- do.call(rbind, EXTRACTOR(names$coords))
+        data$sp <- do.call(rbind, EXTRACTOR(names$coords))
         coords <- c("x", "y", "z")
-        spatialCoordsNames(sce) <- coords[coords %in% names(spatialData(sce))]
+        data$sp_names <- coords[coords %in% names(spatialData(sce))]
+    } else {
+        data$coords <- NULL
     }
+
+    if(object.type == "SingleCellExperiment"){
+        sce <- SingleCellExperiment(
+            assays = data$assays,
+            colData = data$cd,
+            rowData = data$rd,
+            reducedDims = data$dimred
+        )
+    } else if (object.type == "SpatialExperiment"){
+        sce <- SpatialExperiment(
+            assays = data$assays,
+            colData = data$cd,
+            rowData = data$rd,
+            reducedDims = data$dimred,
+            spatialData = data$sp,
+            spatialCoordsNames = data$sp_names
+        )
+    } else {
+        stop("Unexpected object.type (not SCE/SpatialE)")
+    }
+
     if("ENSEMBL" %in% names(rowData(sce))){
         rownames(sce) <- rowData(sce)$ENSEMBL
     }
