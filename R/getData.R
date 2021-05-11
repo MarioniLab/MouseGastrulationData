@@ -71,9 +71,7 @@
     
     if(!is.null(names$rd)){
         ver <- .fetch_version(version, "rowdata")
-        data$rd <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
-    } else {
-        data$rd <- NULL
+        data$rowData <- hub[hub$rdatapath==file.path(host, ver, paste0(names$rd, ".rds"))][[1]]
     }
 
     if(!is.null(names$cd)){
@@ -85,14 +83,7 @@
         if(object.type == "SpatialExperiment" & 
             !"sample_id" %in% names(cd))
             cd$sample_id <- cd$embryo_pos_z
-        data$cd <- cd
-    } else {
-        data$cd <- NULL
-    }
-    if(!is.null(names$sf)){
-        data$sf <- do.call(c, EXTRACTOR(names$sf))
-    } else {
-        data$sf <- NULL
+        data$colData <- cd
     }
 
     if(!is.null(names$dimred)){
@@ -102,37 +93,23 @@
             do.call(rbind, lapply(dr_list, function(y) y[[x]]))
         })
         names(dr_sce) <- dr_types
-        data$dimred <- dr_sce
-    } else {
-        data$dimred <- NULL
+        data$reducedDims <- dr_sce
     }
 
     if(!is.null(names$coords)){
-        data$sp <- do.call(rbind, EXTRACTOR(names$coords))
+        data$spatialCoords <- do.call(rbind, EXTRACTOR(names$coords))
         coords <- c("x", "y", "z")
-        data$sp_names <- coords[coords %in% names(spatialData(sce))]
-    } else {
-        data$coords <- NULL
+        data$spatialCoordNames <- coords[coords %in% names(spatialData(sce))]
     }
 
-    if(object.type == "SingleCellExperiment"){
-        sce <- SingleCellExperiment(
-            assays = data$assays,
-            colData = data$cd,
-            rowData = data$rd,
-            reducedDims = data$dimred
-        )
-    } else if (object.type == "SpatialExperiment"){
-        sce <- SpatialExperiment(
-            assays = data$assays,
-            colData = data$cd,
-            rowData = data$rd,
-            reducedDims = data$dimred,
-            spatialData = data$sp,
-            spatialCoordsNames = data$sp_names
-        )
-    } else {
-        stop("Unexpected object.type (not SCE/SpatialE)")
+    command <- sprintf("%s(%s)",
+        object.type,
+        paste(sapply(names(data), function(x) paste0(x, "=data$", x)),
+            collapse = ","))
+    sce <- eval(parse(text = command))
+
+    if(!is.null(names$sf)){
+        sizeFactors(sce) <- do.call(c, EXTRACTOR(names$sf))
     }
 
     if("ENSEMBL" %in% names(rowData(sce))){
