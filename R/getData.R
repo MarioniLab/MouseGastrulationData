@@ -97,9 +97,9 @@
     }
 
     if(!is.null(names$coords)){
-        data$spatialCoords <- do.call(rbind, EXTRACTOR(names$coords))
+        data$spatialData <- do.call(rbind, EXTRACTOR(names$coords))
         coords <- c("x", "y", "z")
-        data$spatialCoordNames <- coords[coords %in% names(data$spatialCoords)]
+        data$spatialCoordsNames <- coords[coords %in% names(data$spatialData)]
     }
 
     command <- sprintf("%s(%s)",
