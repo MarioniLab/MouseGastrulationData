@@ -1,0 +1,285 @@
+---
+title: Preparing the Argelaguet multiome dataset for _ExperimentHub_
+author: Jonathan Griffiths
+date: 22 July 2022
+output:
+  BiocStyle::html_document:
+    toc_float: true
+---
+
+```{r style, echo=FALSE, results='hide', message=FALSE}
+# from the dockerfile
+# docker run --user rstudio -it ricard_ingest_peaks R
+
+library(BiocStyle)
+
+knitr::opts_chunk$set(error=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Overview
+
+Here we will get the data for Argelaguet et al.'s multiome dataset.
+As I haven't been involved in the work around this dataset, for information on their methods please see their paper.
+
+# Preparing the RNA data
+
+We obtain the processed count data through the `r Biocpkg("BiocFileCache")` framework.
+This caches the data locally upon the first download, avoiding the need to repeat the download on subsequent analyses.
+We access the data from the FTP server provided on Github.
+
+```{r}
+library(BiocFileCache)
+bfc <- BiocFileCache("raw_data", ask=FALSE)
+rna_sce <- bfcrpath(bfc,
+    "ftp://ftpusr92:5FqIACU9@ftp1.babraham.ac.uk/data/processed/rna/SingleCellExperiment.rds")
+
+atac_tss_se <- bfcrpath(bfc,
+    "ftp://ftpusr92:5FqIACU9@ftp1.babraham.ac.uk/data/processed/atac/archR/Matrices/GeneScoreMatrix_TSS_summarized_experiment.rds")
+atac_peaks_se <- bfcrpath(bfc,
+    "ftp://ftpusr92:5FqIACU9@ftp1.babraham.ac.uk/data/processed/atac/archR/Matrices/PeakMatrix_summarized_experiment.rds")
+```
+
+We load in the RNA data from Ricard's SCE object and number the samples:
+
+```{r}
+library(SingleCellExperiment)
+rna <- readRDS(rna_sce)
+
+sample_map = data.frame(sample_name=unique(rna$sample),
+    sample = seq_along(unique(rna$sample)))
+rna$sample_name = rna$sample
+rna$sample = sample_map$sample[match(rna$sample_name, sample_map$sample_name)]
+```
+
+celltype information is only available in the peak objects, so we copy that into the RNA data here.
+
+```{r}
+cd_peak = colData(readRDS(atac_peaks_se))
+cd_peak$celltype.mapped = gsub("_", " ", cd_peak$celltype.mapped)
+cd_peak$celltype.mapped = gsub("Forebrain Midbrain Hindbrain", "Forebrain/Midbrain/Hindbrain", cd_peak$celltype.mapped)
+
+rna$celltype.mapped = cd_peak$celltype.mapped[match(colnames(rna), rownames(cd_peak))]
+```
+
+We add the rowData from Ensembl 92, to which these data were aligned.
+
+```{r}
+gtf_file = bfcrpath(bfc,
+    "ftp://ftp.ensembl.org:/pub/release-92/gtf/mus_musculus/Mus_musculus.GRCm38.92.gtf.gz")
+gtf <- read.table(gtf_file, header=FALSE, sep="\t")
+gtf <- gtf[gtf$V3 == "gene",]
+get <- function(vec, id){
+    sub <- vec[min(which(grepl(id, vec)))]
+    gsub(paste0(id, " "), "", sub)
+}
+gdf <- do.call(rbind, lapply(strsplit(gtf$V9, "; "), function(x){
+    data.frame(ENSEMBL=get(x, "gene_id"), SYMBOL=get(x, "gene_name"))
+}))
+```
+
+We drop `r sum(!rownames(rna) %in% gdf$SYMBOL)` of the `r nrow(rna)` genes from Ricard's data because they lack and Ensembl gene ID.
+
+```{r}
+add_rowdata <- function(sce, genes=gdf, ensemblise=FALSE){
+    rd = genes[match(rownames(sce), genes$SYMBOL),]
+    if(ensemblise){
+        drop = is.na(rd[,1])
+        sce = sce[!drop,]
+        rowData(sce) = rd[!drop,]
+        rownames(sce) = rowData(sce)$ENSEMBL
+    } else {
+        rd$SYMBOL = rownames(sce)
+        rowData(sce) = rd
+        rownames(sce) = rd$SYMBOL
+    }
+    sce
+}
+rna = add_rowdata(rna)
+```
+
+We load the dimensionality reduction data.
+This was provided directly from the authors.
+
+```{r}
+#handle file inconsistency
+process_df = function(f){
+    df = read.delim(f, sep = ",", header=TRUE)
+    rownames(df) = df$cell
+    df = df[,c("V1", "V2")]
+}
+load_dimred = function(dir){
+    files = dir(dir, recursive = TRUE, pattern = "txt.gz$", full.names = TRUE)
+    all_umap = process_df(files[grepl("all", files)])
+    stage_umap = do.call(rbind, lapply(files[!grepl("all", files)], process_df))
+    list(umap = all_umap, umap.perstage = stage_umap)
+}
+types=c("rna", "atac", "rna_atac")
+dimreds = lapply(types, function(x)
+    load_dimred(file.path("dimensionality_reduction", x)))
+names(dimreds) = types
+dimreds = do.call(c, dimreds)
+
+attach_dimred = function(sce, lst=dimreds){
+    new = lapply(lst, function(x) x[match(colnames(sce), rownames(x)),])
+    for(i in seq_along(new)) rownames(new[[i]]) = colnames(sce)
+    reducedDims(sce) = new
+    sce
+}
+rna = attach_dimred(rna)
+```
+
+Correct alignment of column data/row data is shown by plotting the UMAP as follows:
+
+```{r}
+with(reducedDim(rna, "rna.umap"),
+    plot(V1, V2, col = MouseGastrulationData::EmbryoCelltypeColours[rna$celltype.mapped]))
+```
+
+We save the data, split by sample
+
+```{r}
+save_files = function(base, sce, assay_name = "counts-processed", assay_id = "counts"){
+    dir.create(base, recursive=TRUE, showWarnings=FALSE)
+    saveRDS(rowData(sce), file=paste0(base, "/rowdata.rds"))
+    for(samp in unique(sce$sample)){
+        sub = sce[, sce$sample == samp]
+        saveRDS(assay(sub, assay_id), 
+            file=paste0(base, "/", assay_name, "-sample", samp, ".rds"))
+        saveRDS(colData(sub), 
+            file=paste0(base, "/coldata-sample", samp, ".rds"))
+        saveRDS(sizeFactors(sub), 
+            file=paste0(base, "/sizefac-sample", samp, ".rds"))
+        saveRDS(reducedDims(sub), 
+            file=paste0(base, "/reduced-dims-sample", samp, ".rds"))
+    }
+    invisible(0)
+}
+
+path <- file.path("MouseGastrulationData", "RA_rna", "1.12.0")
+save_files(path, rna)
+#memory is precious
+rm(rna); gc()
+```
+
+
+# Preparing the TSS ATAC peak data
+
+Next, we access the ATAC-seq peaks.
+We will upload this more or less exactly as it arrived (i.e., without doing anything fancy around rowRanges).
+We can rapidly apply the same processes now using the functions we defined earlier.
+The rowData is an exception and is processed differently below
+
+```{r}
+tss_assay_name = "counts"
+tss = readRDS(atac_tss_se)
+tss = as(tss, "SingleCellExperiment")
+
+tss$sample_name = tss$sample
+tss$sample = sample_map$sample[match(tss$sample_name, sample_map$sample_name)]
+rowData(tss)$ENSEMBL = gdf$ENSEMBL[match(rowData(tss)$name, gdf$SYMBOL)]
+names(rowData(tss))[match("name", names(rowData(tss)))] = "SYMBOL"
+tss = attach_dimred(tss)
+names(assays(tss)) = tss_assay_name
+
+
+path <- file.path("MouseGastrulationData", "RA_atac_tss", "1.12.0")
+save_files(path, tss)
+#memory is precious
+rm(tss); gc()
+```
+
+# Preparing the whole-genome ATAC peak data
+
+Similarly we can reuse a range of functions from before.
+
+```{r}
+peaks_assay_name = "counts"
+peaks = readRDS(atac_peaks_se)
+peaks = as(peaks, "SingleCellExperiment")
+
+peaks$sample_name = peaks$sample
+peaks$sample = sample_map$sample[match(peaks$sample_name, sample_map$sample_name)]
+peaks = attach_dimred(peaks)
+names(assays(peaks)) = peaks_assay_name
+
+path <- file.path("MouseGastrulationData", "RA_atac_peaks", "1.12.0")
+save_files(path, peaks)
+#memory is precious
+rm(peaks); gc()
+```
+
+# Make file metadata
+
+We now make the metadata for ExperimentHub so the files can be made properly available.
+
+```{r}
+make_df = function(
+    component = "RNA",
+    assay_desc = "Processed counts",
+    assay_name = "counts-processed",
+    path_component = "RA_rna",
+    source_file = "/data/processed/rna/SingleCellExperiment.rds",
+    samples = unique(sample_map$sample)){
+    data.frame(
+    Title = sprintf("RA_multiome %s %s", component,
+        c(sprintf("%s (sample %i)", tolower(assay_desc), samples),
+            "rowData",
+            sprintf("colData (sample %i)", samples),
+            sprintf("size factors (sample %i)", samples),
+            sprintf("reduced dimensions (sample %i)", samples))
+    ),
+    Description = sprintf("%s for the RNA component of the Argelaguet et al. mouse embryo multome dataset", 
+        c(sprintf("%s for sample %i", assay_desc, samples),
+            "Per-gene metadata for all samples",
+            sprintf("Per-cell metadata for sample %i", samples),
+            sprintf("Size factors for sample %i", samples),
+            sprintf("Reduced dimensions for sample %i", samples))
+    ),
+    RDataPath = c(
+        file.path("MouseGastrulationData", path_component, "1.12.0", 
+            c(sprintf("%s-sample%i.rds", assay_name, samples),
+                "rowdata.rds",
+                sprintf("coldata-sample%i.rds", samples),
+                sprintf("sizefac-sample%i.rds", samples),
+                sprintf("reduced-dims-sample%i.rds", samples)))
+    ),
+    BiocVersion="3.16",
+    Genome="mm10",
+    SourceType="Rds",
+    SourceUrl="ftp://ftpusr92:5FqIACU9@ftp1.babraham.ac.uk",
+    SourceVersion=source_file,
+    Species="Mus musculus",
+    TaxonomyId="10090",
+    Coordinate_1_based=FALSE,
+    DataProvider="Jonathan Griffiths",
+    Maintainer="Jonathan Griffiths <jonathan.griffiths.94@gmail.com>",
+    RDataClass="character",
+    DispatchClass="Rds",
+    stringsAsFactors = FALSE
+  )
+}
+
+d1 = make_df()
+d2 = make_df(
+    component = "ATAC at TSS",
+    assay_desc = "ATAC gene score at TSS",
+    path_component = "RA_atac_tss",
+    source_file = "/data/processed/atac/archR/Matrices/GeneScoreMatrix_TSS_summarized_experiment.rds"
+)
+d3 = make_df(
+    component = "ATAC peaks",
+    assay_desc = "ATAC peaks",
+    path_component = "RA_atac_peaks",
+    source_file = "/data/processed/atac/archR/Matrices/PeakMatrix_summarized_experiment.rds"
+)
+info = rbind(d1, d2, d3)
+
+write.csv(file="../../extdata/metadata-ramultiome.csv", info, row.names=FALSE)
+
+```
+
+# Session information
+
+```{r}
+sessionInfo()
+```
