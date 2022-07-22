@@ -245,7 +245,7 @@ make_df = function(
     ),
     BiocVersion="3.16",
     Genome="mm10",
-    SourceType="Rds",
+    SourceType="RDS",
     SourceUrl="ftp://ftpusr92:5FqIACU9@ftp1.babraham.ac.uk",
     SourceVersion=source_file,
     Species="Mus musculus",
@@ -254,7 +254,7 @@ make_df = function(
     DataProvider="Jonathan Griffiths",
     Maintainer="Jonathan Griffiths <jonathan.griffiths.94@gmail.com>",
     RDataClass="character",
-    DispatchClass="Rds",
+    DispatchClass="RDS",
     stringsAsFactors = FALSE
   )
 }
@@ -274,7 +274,7 @@ d3 = make_df(
 )
 info = rbind(d1, d2, d3)
 
-write.csv(file="../../extdata/metadata-ramultiome.csv", info, row.names=FALSE)
+write.csv(file="../../extdata/metadata-ra-multiome.csv", info, row.names=FALSE)
 
 ```
 
