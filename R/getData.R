@@ -2,9 +2,9 @@
 # Versatile function for different data types
 ####
 #' @importFrom ExperimentHub ExperimentHub
-#' @importFrom SingleCellExperiment SingleCellExperiment 
-#' @importFrom SpatialExperiment SpatialExperiment 
-#' @importFrom BumpyMatrix BumpyMatrix 
+#' @importFrom SingleCellExperiment SingleCellExperiment
+#' @importFrom SpatialExperiment SpatialExperiment
+#' @importFrom BumpyMatrix BumpyMatrix
 #' @importFrom BiocGenerics sizeFactors<-
 #' @importFrom BiocGenerics cbind
 #' @importFrom BiocGenerics rbind
@@ -27,7 +27,8 @@
     sample.err,
     names,
     object.type=c("SingleCellExperiment", "SpatialExperiment"),
-    return.list=FALSE
+    return.list=FALSE,
+    ensemblise=TRUE
 ){
     object.type <- match.arg(object.type)
     hub <- ExperimentHub()
@@ -112,7 +113,7 @@
         sizeFactors(sce) <- do.call(c, EXTRACTOR(names$sf))
     }
 
-    if("ENSEMBL" %in% names(rowData(sce))){
+    if("ENSEMBL" %in% names(rowData(sce)) & ensemblise){
         rownames(sce) <- rowData(sce)$ENSEMBL
     }
     if("cell" %in% names(colData(sce))){
@@ -124,7 +125,7 @@
 ####
 # Simpler interfaces for specific data types
 ####
-.getRNAseqData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL){
+.getRNAseqData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL, ens_rownames=TRUE){
     if(type == "processed"){ return(
         .getData(
             dataset,
@@ -139,7 +140,8 @@
                 sf="sizefac",
                 dimred="reduced-dims"
             ),
-            object.type="SingleCellExperiment"
+            object.type="SingleCellExperiment",
+            ensemblise=ens_rownames
         ))
     } else if (type == "raw"){ return(
         .getData(
@@ -153,12 +155,13 @@
                 rd="rowdata"
             ),
             object.type="SingleCellExperiment",
-            return.list=TRUE
+            return.list=TRUE,
+            ensemblise=ens_rownames
         ))
     }
 }
 
-.getSeqFISHData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL){
+.getSeqFISHData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL, ens_rownames=TRUE){
     if(type == "observed"){
         .getData(
             dataset,
@@ -174,7 +177,8 @@
                 dimred="reduced-dims",
                 coords="spatial-coords"
             ),
-            object.type="SpatialExperiment"
+            object.type="SpatialExperiment",
+            ensemblise=ens_rownames
         )
     } else if (type == "imputed"){
         .getData(
@@ -189,7 +193,8 @@
                 cd="coldata",
                 coords="spatial-coords"
             ),
-            object.type="SpatialExperiment"
+            object.type="SpatialExperiment",
+            ensemblise=ens_rownames
         )
     }
 }
