@@ -8,9 +8,15 @@
 #' If \code{NULL} (default), data are returned for all (11) samples.
 #' 
 #' @return 
-#' If \code{type="all"}, a \linkS4class{MultiAssayExperiment} object is returned containing processed data from selected samples for all data types.
+#' If \code{type="all"}, a \linkS4class{SingleCellExperiment} object is returned containing processed data from selected samples for all data types.
+#' RNA-seq data is in the primary assay slot, while the other data types are in the altExp slot.
+#' No assay will occupy the default \code{counts} slot for clarity for the user.
 #'
-#' If \code{type="rna"}, \code{type="atac"}, or \code{type="tss"}, a \linkS4class{SingleCellExperiment} object is returned containing information for a single data type.
+#' If \code{type="rna"}, \code{type="peaks"}, or \code{type="tss"}, a \linkS4class{SingleCellExperiment} object is returned containing information for a single data type.
+#' Each assay will be in the primary \code{counts} slot.
+#' RNA data corresponds to RNA-seq read counts.
+#' Peak data corresponds to read counts from ATAC-seq peaks.
+#' TSS data corresponds to (???)
 #' 
 #' @details
 #' This function downloads the data for the embryo atlas from Argelaguet et al. (2022).
