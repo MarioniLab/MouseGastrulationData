@@ -1,7 +1,7 @@
 ---
 title: Overview of the MouseGastrulationData datasets
 author: Jonathan Griffiths and Aaron Lun
-date: "Revised: August 28, 2020"
+date: "Revised: September 14, 2022"
 output:
   BiocStyle::html_document:
     toc_float: true
@@ -225,6 +225,14 @@ This includes the locations of individual RNA molecules within cells, and also s
 Segmentation masks were determined from cell membrane staining, not from simple distance-to-nuclei methods, which is a unique aspect of this dataset (at the time of its publication).
 See the function manual page for information on how this data is delivered.
 
+# 10X multiome data information
+Data from @ricard_multiome is available in the `RAMultiomeData()` function.
+This dataset contains both RNA expression and chromatin accessibility data from the same cells, from gastrulation embryos of various timepoints.
+ATAC-seq data is available via a gene promoter accessibility score (`altExp(sce, "TSS_gene_score")`) and genome-wide peak presence (`altExp(sce, "ATAC_peak_counts")`).
+The way `altExp`s work is that these are themselves `SingleCellExperiment` objects, with identical `colData` to the main `SingleCellExperiment` object.
+Check the documentation for `RAMultiomeData()` for more information on the contents of each matrix.
+Similarly to the main atlas, metadata for each sample is available using `RASampleMetadata`.
+
 # Accessory data information
 
 Some additional data is provided that is specific to analyses performed in individual publications whose data is in this package.
@@ -234,8 +242,9 @@ At the moment, the only example of this is `GuibentifExtraData()`, which downloa
 
 A user might want to use these data outside of the *Bioconductor* framework in which it is provided from this package.
 Fortunately, there are several packages available for *R* that facilitate this.
-The `r Biocpkg("LoomExperiment")` package will allow you to save the data as a `.loom` file, which would be easily imported into python for use with e.g. *scanpy*.
-Alternatively, you might want to consider `r Githubpkg("mojaveazure/loomR")`, which is available through *Github*.
+In my experience, `r Biocpkg("zellkonverter")` is by far the best approach for creating h5ad files for use with (scanpy*.
+An alternative is to use the `r Biocpkg("LoomExperiment")` package to create `.loom` files.
+You could instead use `r Githubpkg("mojaveazure/loomR")`, which is available through *Github*.
 `r CRANpkg("Seurat")` has a function `as.Seurat` to directly convert SingleCellExperiment files directly to *Seurat*-friendly objects.
 
 In any case, it is likely that this package is the easiest way to access the mouse gastrulation datasets, regardless of how you wish to analyse it downstream.

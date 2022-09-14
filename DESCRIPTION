@@ -31,4 +31,4 @@ Encoding: UTF-8
 biocViews: ExperimentData, ExpressionData, SequencingData, RNASeqData, SingleCellData, ExperimentHub, Mus_musculus_Data
 URL: https://github.com/MarioniLab/MouseGastrulationData
 BugReports: https://github.com/MarioniLab/MouseGastrulationData/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.1
