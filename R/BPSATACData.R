@@ -4,6 +4,8 @@
 #'
 #' @param type String specifying the type of data to obtain, see Details.
 #' Default behaviour is to return processed data.
+#' @param Csparse.assays Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+#' Default behaviour is to perform the conversion.
 #' 
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing the processed data.
@@ -81,8 +83,8 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-BPSATACData <- function(type=c("processed", "raw")) {
+BPSATACData <- function(type=c("processed", "raw"), Csparse.assays=TRUE) {
     type <- match.arg(type)
     versions <- list(base="1.6.0")
-    .getRNAseqData("BPS_atac", type, versions, samples=1, sample.options=as.character(1), sample.err="1")
+    .getRNAseqData("BPS_atac", type, versions, samples=1, sample.options=as.character(1), sample.err="1", makeCsparse=Csparse.assays)
 }

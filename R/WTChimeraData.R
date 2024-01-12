@@ -6,6 +6,8 @@
 #' Default behaviour is to return processed data.
 #' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 #' If \code{NULL} (default), data are returned for all (ten) samples.
+#' @param Csparse.assays Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+#' Default behaviour is to perform the conversion.
 #'
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples
@@ -76,8 +78,8 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-WTChimeraData <- function(type=c("processed", "raw"), samples=NULL) {
+WTChimeraData <- function(type=c("processed", "raw"), samples=NULL, Csparse.assays=TRUE) {
     type <- match.arg(type)
     versions <- list(base="1.0.0")
-    .getRNAseqData("wt-chimera", type, versions, samples, sample.options=as.character(seq_len(10)), sample.err="1:10")
+    .getRNAseqData("wt-chimera", type, versions, samples, sample.options=as.character(seq_len(10)), sample.err="1:10", makeCsparse=Csparse.assays)
 }

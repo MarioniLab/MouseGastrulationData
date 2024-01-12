@@ -7,7 +7,8 @@
 EmbryoAtlasData(
   type = c("processed", "raw"),
   samples = NULL,
-  get.spliced = FALSE
+  get.spliced = FALSE,
+  Csparse.assays = TRUE
 )
 }
 \arguments{
@@ -18,6 +19,9 @@ Default behaviour is to return processed data.}
 If \code{NULL} (default), data are returned for all (36) samples.}
 
 \item{get.spliced}{Logical indicating whether to also download the spliced/unspliced/ambiguously spliced count matrices.}
+
+\item{Csparse.assays}{Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+Default behaviour is to perform the conversion.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.

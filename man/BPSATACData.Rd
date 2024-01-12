@@ -4,11 +4,14 @@
 \alias{BPSATACData}
 \title{E8.25 snATAC-seq data}
 \usage{
-BPSATACData(type = c("processed", "raw"))
+BPSATACData(type = c("processed", "raw"), Csparse.assays = TRUE)
 }
 \arguments{
 \item{type}{String specifying the type of data to obtain, see Details.
 Default behaviour is to return processed data.}
+
+\item{Csparse.assays}{Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+Default behaviour is to perform the conversion.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing the processed data.

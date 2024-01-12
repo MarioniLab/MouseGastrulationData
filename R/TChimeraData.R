@@ -6,6 +6,8 @@
 #' Default behaviour is to return processed data.
 #' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 #' If \code{NULL} (default), data are returned for all QC-passing (fourteen) samples.
+#' @param Csparse.assays Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+#' Default behaviour is to perform the conversion.
 #'
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples
@@ -86,10 +88,10 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-TChimeraData <- function(type=c("processed", "raw"), samples=c(1:2, 5:16)) {
+TChimeraData <- function(type=c("processed", "raw"), samples=c(1:2, 5:16), Csparse.assays=TRUE) {
     if(any(3:4 %in% samples))
         warning("You are downloading the QC-fail samples 3 and/or 4.")
     type <- match.arg(type)
     versions <- list(base="1.4.0")
-    .getRNAseqData("t-chimera", type, versions, samples, sample.options=as.character(seq_len(16)), sample.err="1:16")
+    .getRNAseqData("t-chimera", type, versions, samples, sample.options=as.character(seq_len(16)), sample.err="1:16", makeCsparse=Csparse.assays)
 }
