@@ -22,7 +22,8 @@ Imports:
 Suggests: 
     BiocStyle, 
     knitr, 
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: 
     knitr
 License: GPL-3
