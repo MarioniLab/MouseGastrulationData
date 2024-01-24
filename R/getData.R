@@ -28,7 +28,8 @@
     names,
     object.type=c("SingleCellExperiment", "SpatialExperiment"),
     return.list=FALSE,
-    ensemblise=TRUE
+    ensemblise=TRUE,
+    makeCsparse=FALSE
 ){
     object.type <- match.arg(object.type)
     hub <- ExperimentHub()
@@ -45,7 +46,8 @@
 
     if(return.list){
         out <- lapply(samples, function(x){ .getData(dataset, version, x,
-            sample.options, sample.err, names, object.type, return.list=FALSE)})
+            sample.options, sample.err, names, object.type, return.list=FALSE,
+            ensemblise=ensemblise, makeCsparse=makeCsparse)})
         names(out) <- samples
         return(out)
     }
@@ -119,13 +121,16 @@
     if("cell" %in% names(colData(sce))){
         colnames(sce) <- colData(sce)$cell
     }
+    if(makeCsparse){
+        sce <- .makeCsparse(sce)
+    }
     return(sce)
 }
 
 ####
 # Simpler interfaces for specific data types
 ####
-.getRNAseqData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL, ens_rownames=TRUE){
+.getRNAseqData <- function(dataset, type, version, samples, sample.options, sample.err, extra_assays=NULL, ens_rownames=TRUE, makeCsparse=FALSE){
     if(type == "processed"){ return(
         .getData(
             dataset,
@@ -141,7 +146,8 @@
                 dimred="reduced-dims"
             ),
             object.type="SingleCellExperiment",
-            ensemblise=ens_rownames
+            ensemblise=ens_rownames,
+            makeCsparse=makeCsparse
         ))
     } else if (type == "raw"){ return(
         .getData(
@@ -156,7 +162,8 @@
             ),
             object.type="SingleCellExperiment",
             return.list=TRUE,
-            ensemblise=ens_rownames
+            ensemblise=ens_rownames,
+            makeCsparse=makeCsparse
         ))
     }
 }
@@ -209,4 +216,13 @@
     } else {
         opt
     }
+}
+
+.makeCsparse <- function(sce){
+    for(an in assayNames(sce)){
+        if(is(assay(sce, an), "TsparseMatrix")){
+            assay(sce, an) <- as(assay(sce, an), "CsparseMatrix")
+        }
+    }
+    return(sce)
 }

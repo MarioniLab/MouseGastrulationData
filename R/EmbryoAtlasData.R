@@ -7,6 +7,8 @@
 #' @param samples Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 #' If \code{NULL} (default), data are returned for all (36) samples.
 #' @param get.spliced Logical indicating whether to also download the spliced/unspliced/ambiguously spliced count matrices.
+#' @param Csparse.assays Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+#' Default behaviour is to perform the conversion.
 #' 
 #' @return 
 #' If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples.
@@ -76,7 +78,7 @@
 #' @importFrom BiocGenerics sizeFactors
 #' @importClassesFrom S4Vectors DataFrame
 #' @importFrom methods as
-EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.spliced=FALSE) {
+EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.spliced=FALSE, Csparse.assays=TRUE) {
     type <- match.arg(type)
     versions <- list(base="1.0.0")
     extra_a <- NULL
@@ -93,5 +95,5 @@ EmbryoAtlasData <- function(type=c("processed", "raw"), samples=NULL, get.splice
             "counts-unspliced"="1.4.0",
             "counts-ambig"="1.4.0"))
     }
-    .getRNAseqData("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37", extra_assays = extra_a)
+    .getRNAseqData("atlas", type, versions, samples, sample.options=as.character(c(1:10, 12:37)), sample.err="1:10 or 12:37", extra_assays = extra_a, makeCsparse=Csparse.assays)
 }

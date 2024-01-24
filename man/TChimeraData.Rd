@@ -4,7 +4,11 @@
 \alias{TChimeraData}
 \title{T chimera data}
 \usage{
-TChimeraData(type = c("processed", "raw"), samples = c(1:2, 5:16))
+TChimeraData(
+  type = c("processed", "raw"),
+  samples = c(1:2, 5:16),
+  Csparse.assays = TRUE
+)
 }
 \arguments{
 \item{type}{String specifying the type of data to obtain, see Details.
@@ -12,6 +16,9 @@ Default behaviour is to return processed data.}
 
 \item{samples}{Integer or character vector specifying the samples for which data (processed or raw) should be obtained.
 If \code{NULL} (default), data are returned for all QC-passing (fourteen) samples.}
+
+\item{Csparse.assays}{Logical indicating whether to convert assay matrices into the column major format that is more performant with contemporary software packages.
+Default behaviour is to perform the conversion.}
 }
 \value{
 If \code{type="processed"}, a \linkS4class{SingleCellExperiment} is returned containing processed data from selected samples
